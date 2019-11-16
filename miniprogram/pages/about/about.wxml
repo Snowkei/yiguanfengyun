@@ -1,0 +1,80 @@
+<view class='about'>
+  <view class='content'>
+  <!-- 轮播 -->
+    <swiper indicator-color='#666666' indicator-active-color='#40a7e7' indicator-dots="true" autoplay="true" circular="true" interval="5000" duration="300" previous-margin="0px" next-margin="0px" style='height:{{swiperHeight}}'>
+      <block wx:for="{{bannerImgList}}" wx:key="{{index}}">
+        <swiper-item>
+          <view class='info' data-index='{{index}}' catchtap='previewImages'>
+            <image src='{{item.src}}'></image>
+            <view class='name'>{{item.title}}</view>
+          </view>
+        </swiper-item>
+      </block>
+    </swiper>
+    <view class='item'>
+      <view class='title'>代码已开源</view>
+      <view class='i' catchtap='copy' data-title='项目地址' data-content='{{projectAddress}}'>
+        <view class='icon'>
+          <image src='/images/github.png'></image>
+        </view>
+        <view class='text'>
+          <view>谢谢 star</view>
+          <view>{{projectAddress}}</view>
+        </view>
+      </view>
+    </view>
+    <view class='item'>
+      <view class='title'>联系开发者</view>
+      <view class='i' catchtap='copy' data-title='GitHub' data-content='{{github}}'>
+        <view class='icon'>
+          <image src='/images/github.png'></image>
+        </view>
+        <view class='text'>
+          <view>通过 GitHub 反馈</view>
+          <view>{{github}}</view>
+        </view>
+      </view>
+      <view class='i' catchtap='copy' data-title='邮箱' data-content='{{email}}'>
+        <view class='icon'>
+          <image src='/images/email.png'></image>
+        </view>
+        <view class='text'>
+          <view>通过 Email 反馈</view>
+          <view>{{email}}</view>
+        </view>
+      </view>
+      <view class='i' catchtap='copy' data-title='QQ' data-content='{{qq}}'>
+        <view class='icon'>
+          <image src='/images/qq.png'></image>
+        </view>
+        <view class='text'>
+          <view>通过 QQ 反馈</view>
+          <view>{{qq}}</view>
+        </view>
+      </view>
+      <view class='i'>
+        <view class='icon'>
+          <image src='/images/wechat.png'></image>
+        </view>
+        <view class='text'>微信快速联系</view>
+        <button open-type="contact" class='btn'></button>
+      </view>
+    </view>
+    <view class='thanks item'>
+      <view class='title'>鸣谢</view>
+      <view class='i'>
+        <view class='icon'>
+          <image src='/images/location_grey.png'></image>
+        </view>
+        <view class='text'>地理编码：百度地图开放平台</view>
+      </view>
+      <view class='i'>
+        <view class='icon'>
+          <image src='/images/weather.png'></image>
+        </view>
+        <view class='text'>天气数据来源：百度地图开放平台</view>
+      </view>
+    </view>
+  </view>
+  <view class='footer'>开发者 · QiGe</view>
+</view>

@@ -1,0 +1,26 @@
+<!--城市选择页面-->
+<view class="container">
+  <view class="wrapper">
+    <!-- 城市搜索框 -->
+    <view class="search">
+      <view class="inner">
+        <image class="icon" src="/images/search_grey.png"></image>
+        <input value="{{inputText}}" placeholder="搜索城市" maxlength="20" confirm-type="搜索" bindinput="inputFilter" bindconfirm="inputFilter" bindfocus="inputFilter"></input>
+      </view>
+      <text class="cancel" catchtap="cancel">清空</text>
+    </view>
+  </view>
+  <!-- 热门城市 -->
+  <!-- <view class="top" wx:if="{{hotCities.length}}">
+    <view class="title">热门城市</view>
+    <view class="items">
+      <view class="item" hover-class="hover-ddd" catchtap="choose" data-item="{{item}}" wx:key="{{index}}" wx:for="{{hotCities}}">{{item.name}}</view>
+    </view>
+  </view> -->
+  <!-- 底部 -->
+  <view class="bottom">
+    <view wx:key=""></view>
+  </view>
+  <view class="empty" wx:if='{{!showItems}}'>暂无城市可选</view>
+</view>
+

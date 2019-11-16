@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "易观风云",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "heartbeat": "/components/heartbeat/heartbeat"
+  }
+}
