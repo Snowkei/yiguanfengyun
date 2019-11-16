@@ -1,66 +1,68 @@
-// pages/systeminfo/systeminfo.js
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    systeminfoObj: {},
+    systeminfoArr: [
+      {
+        key: 'brand',
+        name: '手机品牌',
+      },
+      {
+        key: 'model',
+        name: '手机型号',
+      },
+      {
+        key: 'pixelRatio',
+        name: '设备像素比',
+      },
+      {
+        key: 'screenWidth',
+        name: '屏幕宽度',
+      },
+      {
+        key: 'screenHeight',
+        name: '屏幕高度',
+      },
+      {
+        key: 'windowWidth',
+        name: '可使用窗口宽度',
+      },
+      {
+        key: 'windowHeight',
+        name: '可使用窗口高度',
+      },
+      {
+        key: 'statusBarHeight',
+        name: '状态栏高度',
+      },
+      {
+        key: 'language',
+        name: '微信设置的语言',
+      },
+      {
+        key: 'version',
+        name: '微信版本号',
+      },
+      {
+        key: 'system',
+        name: '操作系统版本',
+      },
+      {
+        key: 'platform',
+        name: '客户端平台',
+      },
+      {
+        key: 'fontSizeSetting',
+        name: '用户字体大小设置(px)',
+      },
+      {
+        key: 'SDKVersion',
+        name: '客户端基础库版本',
+      },
+    ],
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-
+  onShow() {
+    this.setData({
+      systeminfoObj: getApp().globalData.systeminfo
+    })
   },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
-  }
 })
