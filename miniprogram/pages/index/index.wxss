@@ -1,307 +1,139 @@
-/**
- * 易观风云 - 主页样式
- */
-.page {
-  position: relative;
-  min-height: 100vh;
-}
+/* 易观风云 - 主页样式 */
+.page { position: relative; min-height: 100vh; }
 
 /* 背景 */
-.page-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-}
+.page-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; }
+.page-bg-img { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; width: 100%; height: 100%; }
 
-.page-bg-img {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* 导航栏 */
-.nav-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-}
-
-.nav-content {
-  height: 88rpx;
-  display: flex;
-  align-items: center;
-  padding: 0 24rpx;
-}
-
+/* 导航 */
+.nav-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+.nav-content { height: 88rpx; display: flex; align-items: center; padding: 0 24rpx; }
 .search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  height: 64rpx;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 32rpx;
-  padding: 0 24rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  flex: 1; display: flex; align-items: center; height: 64rpx;
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 32rpx; padding: 0 24rpx; border: 1rpx solid rgba(255,255,255,0.3);
 }
+.search-icon { width: 28rpx; height: 28rpx; margin-right: 12rpx; opacity: 0.8; }
+.search-input { flex: 1; color: #fff; font-size: 26rpx; }
+.search-placeholder { color: rgba(255,255,255,0.6); }
 
-.search-icon {
-  width: 28rpx;
-  height: 28rpx;
-  margin-right: 12rpx;
-  opacity: 0.8;
-}
-
-.search-input {
-  flex: 1;
-  color: #fff;
-  font-size: 26rpx;
-}
-
-.search-placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* 滚动区域 */
-.main-scroll {
-  position: relative;
-  z-index: 1;
-  height: 100vh;
-  padding-top: env(safe-area-inset-top);
-}
+/* 滚动区 */
+.main-scroll { position: relative; z-index: 1; height: 100vh; padding-top: env(safe-area-inset-top); }
 
 /* 头部 */
-.header {
-  text-align: center;
-  color: #fff;
-  padding: 140rpx 40rpx 40rpx;
-}
-
-.header-info {
-  margin-bottom: 10rpx;
-}
-
-.city-name {
-  font-size: 44rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-}
-
-.update-time {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 6rpx;
-}
-
-.greeting {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 20rpx;
-}
-
-.current-temp {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  margin: 10rpx 0;
-}
-
-.temp-num {
-  font-size: 180rpx;
-  font-weight: 200;
-  line-height: 1;
-  text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-}
-
-.temp-unit {
-  font-size: 48rpx;
-  font-weight: 300;
-  margin-top: 20rpx;
-  opacity: 0.8;
-}
-
-.current-weather {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 16rpx 0;
-}
-
-.weather-icon {
-  font-size: 40rpx;
-  margin-right: 10rpx;
-}
-
-.weather-text {
-  font-size: 32rpx;
-  font-weight: 400;
-  opacity: 0.9;
-}
-
+.header { text-align: center; color: #fff; padding: 140rpx 40rpx 40rpx; }
+.city-name { font-size: 44rpx; font-weight: 700; letter-spacing: 2rpx; text-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1); }
+.update-time { font-size: 22rpx; color: rgba(255,255,255,0.6); margin-top: 6rpx; }
+.greeting { font-size: 24rpx; color: rgba(255,255,255,0.75); margin-bottom: 10rpx; }
+.current-temp { display: flex; align-items: flex-start; justify-content: center; margin: 10rpx 0; }
+.temp-num { font-size: 180rpx; font-weight: 200; line-height: 1; text-shadow: 0 4rpx 16rpx rgba(0,0,0,0.1); }
+.temp-unit { font-size: 48rpx; font-weight: 300; margin-top: 20rpx; opacity: 0.8; }
+.current-weather { display: flex; align-items: center; justify-content: center; gap: 12rpx; margin: 16rpx 0; }
+.weather-icon-big { font-size: 40rpx; }
+.weather-text { font-size: 32rpx; font-weight: 400; opacity: 0.9; }
+.feels-like { font-size: 22rpx; color: rgba(255,255,255,0.6); }
 .pm-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 8rpx 24rpx;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 32rpx;
-  font-size: 22rpx;
-  color: #fff;
-  margin-top: 10rpx;
+  display: inline-flex; align-items: center; padding: 8rpx 24rpx;
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 32rpx; font-size: 22rpx; color: #fff; margin-top: 10rpx;
 }
+.pm-dot { width: 12rpx; height: 12rpx; border-radius: 50%; margin-right: 10rpx; }
 
-.pm-dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  margin-right: 10rpx;
+/* 内容区域 */
+.section { position: relative; z-index: 2; }
+.glass-card {
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 24rpx; margin: 0 24rpx 20rpx; padding: 28rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.08); border: 1rpx solid rgba(255,255,255,0.5);
 }
+.card-title { font-size: 26rpx; font-weight: 600; color: #666; margin-bottom: 20rpx; display: flex; align-items: center; }
+.card-title .icon { margin-right: 10rpx; font-size: 28rpx; }
 
-/* 内容区域 - 白色卡片容器 */
-.section {
-  position: relative;
-  z-index: 2;
+/* 24小时 */
+.hourly-scroll { white-space: nowrap; overflow: hidden; }
+.hourly-list { display: flex; padding: 10rpx 0; }
+.hourly-item {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 110rpx; padding: 16rpx 8rpx; border-radius: 20rpx; margin-right: 4rpx; transition: all 0.3s;
 }
+.hourly-item.current { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; box-shadow: 0 6rpx 20rpx rgba(102,126,234,0.3); }
+.hourly-time { font-size: 22rpx; color: #999; margin-bottom: 12rpx; }
+.hourly-item.current .hourly-time { color: rgba(255,255,255,0.8); }
+.hourly-icon { font-size: 40rpx; margin-bottom: 12rpx; }
+.hourly-temp { font-size: 28rpx; font-weight: 600; color: #333; }
+.hourly-item.current .hourly-temp { color: #fff; }
 
-.section .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24rpx;
-  margin: 0 24rpx 20rpx;
-  padding: 28rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-  border: 1rpx solid rgba(255, 255, 255, 0.5);
+/* 多天预报 */
+.forecast-list { display: flex; flex-direction: column; }
+.forecast-item {
+  display: grid; grid-template-columns: 90rpx 50rpx 100rpx 1fr; align-items: center;
+  padding: 18rpx 0; border-bottom: 1rpx solid rgba(0,0,0,0.04);
 }
+.forecast-item:last-child { border-bottom: none; }
+.forecast-item.today { font-weight: 600; }
+.day-name { font-size: 26rpx; color: #666; }
+.forecast-item.today .day-name { color: #667eea; }
+.day-icon { font-size: 32rpx; text-align: center; }
+.day-weather { font-size: 22rpx; color: #aaa; text-align: center; }
+.day-temp-bar { display: flex; align-items: center; }
+.temp-bar { position: relative; width: 100%; height: 6rpx; background: rgba(0,0,0,0.06); border-radius: 3rpx; flex: 1; }
+.temp-bar-fill { position: absolute; top: 0; height: 100%; border-radius: 3rpx; min-width: 20%; }
+.temp-range-text { font-size: 22rpx; color: #999; margin-left: 12rpx; white-space: nowrap; }
+.day-precip { margin-left: 8rpx; }
+.precip-text { font-size: 20rpx; color: #42a5f5; }
+
+/* 天气详情 */
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16rpx; }
+.detail-cell {
+  display: flex; align-items: center; padding: 16rpx; border-radius: 16rpx; background: rgba(0,0,0,0.02);
+}
+.detail-icon { font-size: 32rpx; margin-right: 12rpx; flex-shrink: 0; }
+.detail-label { font-size: 20rpx; color: #bbb; margin-bottom: 2rpx; display: block; width: 100%; }
+.detail-value { font-size: 26rpx; font-weight: 600; color: #333; display: block; width: 100%; }
+
+/* AQI */
+.aqi-row { display: flex; align-items: center; }
+.aqi-badge {
+  width: 130rpx; height: 130rpx; border-radius: 24rpx; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; margin-right: 24rpx;
+}
+.aqi-val { font-size: 40rpx; font-weight: 700; color: #fff; }
+.aqi-desc { font-size: 20rpx; color: rgba(255,255,255,0.9); }
+.aqi-info { flex: 1; }
+.aqi-detail-text { font-size: 22rpx; color: #999; margin-bottom: 12rpx; }
+.aqi-bar-wrap { position: relative; height: 10rpx; border-radius: 5rpx; background: linear-gradient(to right, #00e400, #ffff00, #ff7e00, #ff0000, #99004c, #7e0023); margin-bottom: 8rpx; }
+.aqi-bar-indicator {
+  position: absolute; top: -4rpx; width: 18rpx; height: 18rpx; border-radius: 50%;
+  background: #fff; border: 3rpx solid #333; transform: translateX(-50%);
+}
+.aqi-labels { display: flex; justify-content: space-between; font-size: 18rpx; color: #ccc; }
 
 /* 底部 */
-.footer {
-  text-align: center;
-  padding: 40rpx 0 120rpx;
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.5);
-  position: relative;
-  z-index: 2;
-}
+.footer { text-align: center; padding: 40rpx 0 120rpx; font-size: 22rpx; color: rgba(255,255,255,0.4); position: relative; z-index: 2; }
 
-/* 背景选择面板 */
-.bcg-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 200;
-}
-
-.bcg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-
+/* 背景面板 */
+.bcg-panel { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; }
+.bcg-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); }
 .bcg-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 32rpx 32rpx 0 0;
-  padding: 32rpx;
-  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 32rpx 32rpx 0 0; padding: 32rpx; padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
 }
-
-.bcg-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 24rpx;
-  text-align: center;
-}
-
-.bcg-list {
-  display: flex;
-  gap: 16rpx;
-  overflow-x: auto;
-  padding-bottom: 16rpx;
-}
-
+.bcg-title { font-size: 30rpx; font-weight: 600; color: #333; margin-bottom: 24rpx; text-align: center; }
+.bcg-list { display: flex; gap: 16rpx; overflow-x: auto; padding-bottom: 16rpx; }
 .bcg-item {
-  flex-shrink: 0;
-  width: 120rpx;
-  height: 200rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-  border: 3rpx solid transparent;
-  position: relative;
+  flex-shrink: 0; width: 120rpx; height: 200rpx; border-radius: 16rpx;
+  overflow: hidden; border: 3rpx solid transparent; position: relative;
 }
-
-.bcg-item.active {
-  border-color: #667eea;
-}
-
-.bcg-item image {
-  width: 100%;
-  height: 100%;
-}
-
-.bcg-gradient {
-  width: 100%;
-  height: 100%;
-  border-radius: 16rpx;
-}
-
-.bcg-label {
-  position: absolute;
-  bottom: 10rpx;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 20rpx;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-.bcg-close {
-  text-align: center;
-  padding: 20rpx 0 0;
-  font-size: 24rpx;
-  color: #999;
-}
+.bcg-item.active { border-color: #667eea; }
+.bcg-gradient { width: 100%; height: 100%; border-radius: 16rpx; }
+.bcg-label { position: absolute; bottom: 10rpx; left: 0; right: 0; text-align: center; font-size: 20rpx; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.bcg-close { text-align: center; padding: 20rpx 0 0; font-size: 24rpx; color: #999; }
 
 /* 悬浮菜单 */
 .fab-menu .fab-item {
-  height: 80rpx;
-  width: 80rpx;
-  position: fixed;
-  z-index: 100;
-  bottom: 150rpx;
-  right: 70rpx;
-  opacity: 0;
-  border-radius: 50%;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+  height: 80rpx; width: 80rpx; position: fixed; z-index: 100;
+  bottom: 150rpx; right: 70rpx; opacity: 0; border-radius: 50%;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.15);
 }
-
-.fab-menu .fab-main {
-  opacity: 1;
-  width: 96rpx;
-  height: 96rpx;
-}
+.fab-menu .fab-main { opacity: 1; width: 96rpx; height: 96rpx; }

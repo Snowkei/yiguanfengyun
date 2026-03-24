@@ -1,4 +1,4 @@
-<!-- 易观风云 - 主页 -->
+<!-- 易观风云 v2.0 -->
 <view class="page {{isIPhoneX ? 'iphonex-padding' : ''}}">
 
   <!-- 背景 -->
@@ -11,21 +11,18 @@
   <!-- 正式内容 -->
   <block wx:if="{{!loading}}">
 
-    <!-- 自定义导航栏 -->
+    <!-- 导航栏 -->
     <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
       <view class="nav-content">
-        <!-- 搜索框 -->
         <view class="search-box">
           <image class="search-icon" src="/images/search.png"></image>
           <input
             class="search-input"
-            placeholder="搜索城市"
+            placeholder="搜索城市天气"
             placeholder-class="search-placeholder"
             confirm-type="search"
             value="{{searchText}}"
             bindconfirm="onSearchConfirm"
-            bindfocus="onSearchFocus"
-            bindblur="onSearchBlur"
           />
         </view>
       </view>
@@ -37,13 +34,15 @@
       enable-back-to-top
       refresher-enabled
       refresher-triggered="{{refreshing}}"
+      refresher-background="transparent"
       bindrefresherrefresh="onPullDownRefresh"
     >
-      <!-- 头部：城市 + 温度 -->
+
+      <!-- ====== 头部：城市 + 温度 ====== -->
       <view class="header fade-in-up">
         <view class="header-info" catchtap="showBcgImgArea">
           <view class="city-name">{{cityName}}</view>
-          <view class="update-time" wx:if="{{updateTime}}">{{updateTime}} 更新</view>
+          <view class="update-time">{{updateTime}} 更新</view>
         </view>
         <view class="greeting">{{greeting}}</view>
         <view class="current-temp">
@@ -51,79 +50,163 @@
           <text class="temp-unit">°C</text>
         </view>
         <view class="current-weather">
-          <text class="weather-icon">{{currentIcon}}</text>
+          <text class="weather-icon-big">{{currentIcon}}</text>
           <text class="weather-text">{{currentWeather}}</text>
+          <text class="feels-like">体感 {{feelsLike}}°</text>
         </view>
         <view class="pm-badge" wx:if="{{pm.val}}">
           <view class="pm-dot" style="background: {{pm.color}}"></view>
-          <text>{{pm.desc}} {{pm.val}}</text>
+          <text>{{pm.desc}} PM2.5 {{pm.val}}</text>
         </view>
       </view>
 
-      <!-- 24小时预报 -->
-      <view class="section fade-in-up" style="animation-delay: 0.1s">
-        <hourly-forecast hourly-data="{{hourlyData}}"></hourly-forecast>
+      <!-- ====== 24小时预报 ====== -->
+      <view class="section fade-in-up" wx:if="{{hourlyData.length > 0}}">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">🕐</text>
+            <text>逐时预报</text>
+          </view>
+          <scroll-view scroll-x class="hourly-scroll" enable-flex>
+            <view class="hourly-list">
+              <view class="hourly-item {{index === 0 ? 'current' : ''}}" wx:for="{{hourlyData}}" wx:key="index">
+                <view class="hourly-time">{{item.time}}</view>
+                <view class="hourly-icon">{{item.icon}}</view>
+                <view class="hourly-temp">{{item.temp}}°</view>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
       </view>
 
-      <!-- 多天预报 -->
-      <view class="section fade-in-up" style="animation-delay: 0.15s">
-        <weather-forecast weather-data="{{weatherData}}"></weather-forecast>
+      <!-- ====== 7天预报 ====== -->
+      <view class="section fade-in-up" wx:if="{{dailyData.length > 0}}">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">📅</text>
+            <text>{{dailyData.length}}天预报</text>
+          </view>
+          <view class="forecast-list">
+            <view class="forecast-item {{index === 0 ? 'today' : ''}}" wx:for="{{dailyData}}" wx:key="index">
+              <view class="day-name">{{item.weekDay}}</view>
+              <view class="day-icon">{{item.icon}}</view>
+              <view class="day-weather">{{item.weather}}</view>
+              <view class="day-temp-bar">
+                <view class="temp-bar">
+                  <view class="temp-bar-fill" style="left: {{item.tempLeft}}%; width: {{item.tempWidth}}%; background: linear-gradient(90deg, {{item.tempColor}})"></view>
+                </view>
+                <view class="temp-range-text">{{item.low}}° / {{item.high}}°</view>
+              </view>
+              <view class="day-precip" wx:if="{{item.precipProb > 0}}">
+                <text class="precip-text">💧{{item.precipProb}}%</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
 
-      <!-- 空气质量 -->
-      <view class="section fade-in-up" style="animation-delay: 0.2s">
-        <aqi-card aqi="{{pm}}" pm25="{{pm.val}}"></aqi-card>
+      <!-- ====== 天气详情 ====== -->
+      <view class="section fade-in-up">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">🌡️</text>
+            <text>天气详情</text>
+          </view>
+          <view class="detail-grid">
+            <view class="detail-cell">
+              <view class="detail-icon">🌡️</view>
+              <view class="detail-label">体感温度</view>
+              <view class="detail-value">{{feelsLike}}°</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">💧</view>
+              <view class="detail-label">相对湿度</view>
+              <view class="detail-value">{{humidity}}%</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">💨</view>
+              <view class="detail-label">风速</view>
+              <view class="detail-value">{{windSpeed}} km/h</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">🧭</view>
+              <view class="detail-label">风向</view>
+              <view class="detail-value">{{windDir}}</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">☀️</view>
+              <view class="detail-label">紫外线</view>
+              <view class="detail-value">{{uvIndex}}</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">🌅</view>
+              <view class="detail-label">日出 / 日落</view>
+              <view class="detail-value">{{sunrise}} / {{sunset}}</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">📊</view>
+              <view class="detail-label">气压</view>
+              <view class="detail-value">{{pressure}} hPa</view>
+            </view>
+            <view class="detail-cell">
+              <view class="detail-icon">🌧️</view>
+              <view class="detail-label">降水概率</view>
+              <view class="detail-value">{{precipProb}}%</view>
+            </view>
+          </view>
+        </view>
       </view>
 
-      <!-- 天气详情 -->
-      <view class="section fade-in-up" style="animation-delay: 0.25s">
-        <sunrise-sunset weather-detail="{
-          wind: windDir,
-          temperature: currentTemp,
-          weather: currentWeather
-        }"></sunrise-sunset>
-      </view>
-
-      <!-- 生活指数 -->
-      <view class="section fade-in-up" style="animation-delay: 0.3s" wx:if="{{indexData.length > 0}}">
-        <lifestyle-indices index-data="{{indexData}}"></lifestyle-indices>
+      <!-- ====== 空气质量 ====== -->
+      <view class="section fade-in-up">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">🌬️</text>
+            <text>空气质量</text>
+          </view>
+          <view class="aqi-row">
+            <view class="aqi-badge" style="background: {{pm.color}}">
+              <view class="aqi-val">{{pm.val || '--'}}</view>
+              <view class="aqi-desc">{{pm.desc || '--'}}</view>
+            </view>
+            <view class="aqi-info">
+              <view class="aqi-detail-text">{{pm.detail || ''}}</view>
+              <view class="aqi-bar-wrap">
+                <view class="aqi-bar-bg"></view>
+                <view class="aqi-bar-indicator" style="left: {{pm.val ? Math.min(pm.val / 5, 100) : 0}}%"></view>
+              </view>
+              <view class="aqi-labels">
+                <text>优</text><text>良</text><text>轻度</text><text>中度</text><text>重度</text><text>严重</text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
 
       <!-- 底部 -->
       <view class="footer">
-        <text>易观风云 · 让天气更有温度</text>
+        <text>易观风云 · Open-Meteo 数据支持</text>
       </view>
+
     </scroll-view>
 
-    <!-- 背景选择面板 -->
+    <!-- 背景选择 -->
     <view class="bcg-panel" wx:if="{{bcgImgAreaShow}}">
       <view class="bcg-overlay" catchtap="hideBcgImgArea"></view>
       <view class="bcg-content">
         <view class="bcg-title">选择背景</view>
         <view class="bcg-list">
-          <view
-            class="bcg-item {{bcgImgIndex === index ? 'active' : ''}}"
-            wx:for="{{bcgImgList}}"
-            wx:key="index"
-            catchtap="chooseBcg"
-            data-index="{{index}}"
-            data-src="{{item.src}}"
-          >
-            <image src="{{item.src}}"></image>
-          </view>
-          <view class="bcg-item {{!bcgImg ? 'active' : ''}}" catchtap="chooseBcg" data-index="-1" data-src="">
+          <view class="bcg-item {{!bcgImg ? 'active' : ''}}" catchtap="chooseBcg" data-src="">
             <view class="bcg-gradient" style="{{bgStyle}}"></view>
             <text class="bcg-label">渐变</text>
           </view>
         </view>
-        <view class="bcg-close" catchtap="hideBcgImgArea">
-          <text>收起</text>
-        </view>
+        <view class="bcg-close" catchtap="hideBcgImgArea"><text>收起</text></view>
       </view>
     </view>
 
     <!-- 悬浮菜单 -->
-    <view class="fab-menu" wx:if="{{!bcgImgAreaShow}}">
+    <view class="fab-menu">
       <image src="/images/location.png" animation="{{animationOne}}" class="fab-item"
         bindtap="menuOne" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
       <image src="/images/setting.png" animation="{{animationTwo}}" class="fab-item"

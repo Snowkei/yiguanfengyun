@@ -1,4 +1,5 @@
-const { storage, cmpVersion } = require('../../utils/weather')
+const { storage } = require('../../utils/helpers')
+const { cmpVersion } = require('../../utils/weather')
 
 Page({
   data: {

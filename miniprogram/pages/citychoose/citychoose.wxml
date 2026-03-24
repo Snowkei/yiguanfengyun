@@ -1,19 +1,11 @@
 <!-- 城市选择 -->
 <view class="page">
   <view class="wrapper">
-    <!-- 搜索 -->
     <view class="search-bar">
       <view class="search-inner">
         <image class="search-icon" src="/images/search_grey.png"></image>
-        <input
-          value="{{inputText}}"
-          placeholder="搜索城市"
-          placeholder-class="ph"
-          maxlength="20"
-          confirm-type="search"
-          bindinput="inputFilter"
-          bindconfirm="inputFilter"
-        />
+        <input value="{{inputText}}" placeholder="搜索城市" placeholder-class="ph"
+          maxlength="20" confirm-type="search" bindinput="inputFilter" bindconfirm="inputFilter" />
       </view>
       <text class="cancel-btn" catchtap="cancel">清空</text>
     </view>
@@ -22,14 +14,8 @@
     <view class="hot-section">
       <view class="section-title">热门城市</view>
       <view class="hot-list">
-        <view
-          class="hot-item"
-          wx:for="{{hotCities}}"
-          wx:key="index"
-          catchtap="choose"
-          data-item="{{item}}"
-          hover-class="hot-item-active"
-        >
+        <view class="hot-item" wx:for="{{hotCities}}" wx:key="index"
+          catchtap="choose" data-item="{{item}}" hover-class="hot-item-active">
           {{item.name}}
         </view>
       </view>
@@ -39,21 +25,15 @@
     <view class="city-list">
       <block wx:for="{{showItems}}" wx:key="letter" wx:for-index="letter">
         <view class="letter-header">{{letter}}</view>
-        <view
-          class="city-item"
-          wx:for="{{item}}"
-          wx:key="name"
-          catchtap="choose"
-          data-item="{{item}}"
-          hover-class="city-item-active"
-        >
+        <view class="city-item" wx:for="{{item}}" wx:key="name"
+          catchtap="choose" data-item="{{item}}" hover-class="city-item-active">
           {{item.name}}
         </view>
       </block>
     </view>
 
-    <view class="empty" wx:if="{{!showItems}}">
-      <text>😔</text>
+    <view class="empty" wx:if="{{!showItems || (Object.keys(showItems).length === 0)}}">
+      <text class="empty-icon">😔</text>
       <text class="empty-text">未找到匹配城市</text>
     </view>
   </view>
