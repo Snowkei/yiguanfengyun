@@ -1,4 +1,6 @@
 {
+  "__usePrivacyCheck__": true,
+  "requiredPrivateInfos": ["getLocation"],
   "pages": [
     "pages/index/index",
     "pages/citychoose/citychoose",

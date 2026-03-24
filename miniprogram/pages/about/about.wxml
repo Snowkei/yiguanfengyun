@@ -74,10 +74,13 @@
     <view class="about-group">
       <view class="group-title">鸣谢</view>
       <view class="thanks-item">
-        <text>🗺️ 地理编码：百度地图开放平台</text>
+        <text>🗺️ 地理编码：Open-Meteo</text>
       </view>
       <view class="thanks-item">
-        <text>🌤️ 天气数据：百度地图开放平台</text>
+        <text>🌤️ 天气数据：Open-Meteo</text>
+      </view>
+      <view class="thanks-item">
+        <text>🌬️ 空气质量：WAQI</text>
       </view>
     </view>
 

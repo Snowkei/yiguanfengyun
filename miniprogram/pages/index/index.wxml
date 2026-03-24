@@ -82,12 +82,20 @@
     <scroll-view
       scroll-y
       class="main-scroll"
+      style="padding-top: {{statusBarHeight + 44}}px"
       enable-back-to-top
       refresher-enabled
       refresher-triggered="{{refreshing}}"
       refresher-background="transparent"
+      refresher-default-style="none"
+      refresher-threshold="80"
       bindrefresherrefresh="onPullDownRefresh"
     >
+      <!-- 自定义下拉刷新指示器 -->
+      <view class="refresh-indicator" wx:if="{{refreshing}}">
+        <view class="refresh-spinner"></view>
+        <text class="refresh-text">正在刷新...</text>
+      </view>
 
       <!-- ====== 头部：城市 + 温度 ====== -->
       <view class="header fade-in-up">

@@ -327,6 +327,13 @@ Page({
   onPullDownRefresh() {
     this.setData({ refreshing: true })
     this.loadWeatherForCity(this.data.activeCityIndex)
+    // 超时保护，防止刷新状态卡住
+    if (this._refreshTimer) clearTimeout(this._refreshTimer)
+    this._refreshTimer = setTimeout(() => {
+      if (this.data.refreshing) {
+        this.setData({ refreshing: false })
+      }
+    }, 10000)
   },
 
   onShareAppMessage() {

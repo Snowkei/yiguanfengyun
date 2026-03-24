@@ -335,25 +335,96 @@ function _parseWeatherData(raw) {
   }
 }
 
+// ========== 隐私合规检查 ==========
+function _checkPrivacy() {
+  return new Promise((resolve) => {
+    if (wx.getPrivacySetting) {
+      wx.getPrivacySetting({
+        success(res) {
+          resolve(!res.needAuthorization)
+        },
+        fail() {
+          resolve(true)
+        },
+      })
+    } else {
+      resolve(true)
+    }
+  })
+}
+
+function _openPrivacyContract() {
+  return new Promise((resolve, reject) => {
+    if (wx.openPrivacyContract) {
+      wx.openPrivacyContract({
+        success() {
+          resolve()
+        },
+        fail() {
+          reject(new Error('隐私协议打开失败'))
+        },
+      })
+    } else {
+      reject(new Error('当前版本不支持隐私协议'))
+    }
+  })
+}
+
 // ========== 定位获取天气 ==========
 function fetchWeatherByLocation() {
   return new Promise((resolve, reject) => {
-    wx.getLocation({
-      type: 'gcj02',
-      success(loc) {
-        fetchWeather(loc.latitude, loc.longitude)
-          .then(resolve)
-          .catch(reject)
-      },
-      fail(err) {
-        // 定位失败，默认北京
-        console.warn('定位失败，使用默认城市北京', err)
-        fetchWeather(39.9042, 116.4074)
-          .then(resolve)
-          .catch(reject)
-      },
+    _checkPrivacy().then(privacyOk => {
+      if (privacyOk) {
+        _doGetLocation(resolve, reject)
+      } else {
+        wx.showModal({
+          title: '隐私提示',
+          content: '需要获取您的位置信息来提供当地天气，请先阅读并同意隐私协议',
+          confirmText: '查看协议',
+          cancelText: '取消',
+          success(res) {
+            if (res.confirm) {
+              _openPrivacyContract().then(() => {
+                // 用户可能同意后重新检查
+                _checkPrivacy().then(ok => {
+                  if (ok) {
+                    _doGetLocation(resolve, reject)
+                  } else {
+                    _fallbackToDefault(resolve, reject)
+                  }
+                })
+              }).catch(() => {
+                _fallbackToDefault(resolve, reject)
+              })
+            } else {
+              _fallbackToDefault(resolve, reject)
+            }
+          },
+        })
+      }
     })
   })
+}
+
+function _doGetLocation(resolve, reject) {
+  wx.getLocation({
+    type: 'gcj02',
+    success(loc) {
+      fetchWeather(loc.latitude, loc.longitude)
+        .then(resolve)
+        .catch(reject)
+    },
+    fail(err) {
+      _fallbackToDefault(resolve, reject)
+    },
+  })
+}
+
+function _fallbackToDefault(resolve, reject) {
+  console.warn('定位失败或用户拒绝，使用默认城市北京')
+  fetchWeather(39.9042, 116.4074)
+    .then(resolve)
+    .catch(reject)
 }
 
 // ========== 通过城市名获取天气 ==========

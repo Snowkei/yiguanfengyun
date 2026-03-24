@@ -101,7 +101,31 @@
 /* ===== 滚动区 ===== */
 .main-scroll {
   position: relative; z-index: 1; height: 100vh;
-  padding-top: calc(env(safe-area-inset-top) + 88rpx);
+  box-sizing: border-box;
+}
+
+/* ===== 下拉刷新指示器 ===== */
+.refresh-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0 8rpx;
+  gap: 12rpx;
+}
+.refresh-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.refresh-text {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.7);
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== 头部 ===== */
