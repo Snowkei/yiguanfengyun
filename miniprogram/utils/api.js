@@ -409,8 +409,6 @@ const QWEATHER_INDICES = [1, 3, 4, 5, 6, 7, 9, 10, 13]
 
 function fetchLifeIndices(lat, lon) {
   return new Promise((resolve, reject) => {
-    // 和风天气生活指数 API（免费）
-    const cityId = `${Math.round(lon * 100)}:${Math.round(lat * 100)}`
     wx.request({
       url: 'https://api.qweather.com/v7/indices/now',
       data: {
@@ -472,7 +470,7 @@ function generateLifeIndices(weatherData) {
   let uvLevel, uvCategory
   if (uvVal <= 2) { uvLevel = '1'; uvCategory = '弱' }
   else if (uvVal <= 5) { uvLevel = '3'; uvCategory = '中等' }
-  else if (uvVal <= 7) { uvLevel = '5'; uvCategory: '强' }
+  else if (uvVal <= 7) { uvLevel = '5'; uvCategory = '强' }
   else { uvLevel = '7'; uvCategory = '很强' }
   indices.push({ type: 5, name: '紫外线指数', level: uvLevel, category: uvCategory, text: `紫外线${uvCategory}，${uvVal > 5 ? '建议涂抹防晒霜' : '外出注意防护'}` })
 

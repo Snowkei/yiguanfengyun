@@ -64,28 +64,6 @@ function showError(msg, duration = 2000) {
   })
 }
 
-// 网络请求封装
-function request(options) {
-  return new Promise((resolve, reject) => {
-    wx.request({
-      url: options.url,
-      method: options.method || 'GET',
-      data: options.data || {},
-      header: options.header || {},
-      success(res) {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve(res.data)
-        } else {
-          reject(new Error(`HTTP ${res.statusCode}`))
-        }
-      },
-      fail(err) {
-        reject(err)
-      },
-    })
-  })
-}
-
 // 安全的 Storage 操作
 const storage = {
   get(key, defaultVal = null) {
@@ -128,6 +106,5 @@ const storage = {
 module.exports = {
   cache,
   showError,
-  request,
   storage,
 }

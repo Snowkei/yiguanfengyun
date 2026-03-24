@@ -2,7 +2,6 @@
  * 易观风云 - 全新架构
  * 使用 Open-Meteo 免费天气 API
  */
-const { storage } = require('./utils/helpers')
 
 App({
   onLaunch() {

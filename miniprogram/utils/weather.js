@@ -94,52 +94,6 @@ function parseWind(windStr) {
   }
 }
 
-// 解析当前温度 "15°C 晴" → "15"
-function parseCurrentTemp(tempStr) {
-  if (!tempStr) return '--'
-  const match = tempStr.match(/(-?\d+)/)
-  return match ? match[1] : '--'
-}
-
-// 解析生活指数
-function parseIndex(indexArr) {
-  if (!indexArr || !Array.isArray(indexArr)) return []
-  const iconMap = {
-    '穿衣': '👔',
-    '洗车': '🚗',
-    '感冒': '💊',
-    '运动': '🏃',
-    '紫外线': '☀️',
-    '旅游': '🏖️',
-    '钓鱼': '🎣',
-    '过敏': '🤧',
-    '舒适度': '😊',
-    '晾晒': '👕',
-    '交通': '🚌',
-    '防晒': '🧴',
-    '雨伞': '☂️',
-  }
-  return indexArr.map(item => {
-    let icon = '📋'
-    for (let key in iconMap) {
-      if (item.tipt && item.tipt.indexOf(key) !== -1) {
-        icon = iconMap[key]
-        break
-      }
-    }
-    return {
-      ...item,
-      icon,
-    }
-  })
-}
-
-// 判断是否为白天
-function isDaytime() {
-  const hour = new Date().getHours()
-  return hour >= 6 && hour < 18
-}
-
 // 获取问候语
 function getGreeting() {
   const hour = new Date().getHours()
@@ -150,17 +104,6 @@ function getGreeting() {
   if (hour >= 17 && hour < 19) return '🌇 傍晚好'
   if (hour >= 19 && hour < 22) return '🌙 晚上好'
   return '🌙 夜深了'
-}
-
-// 防抖
-function debounce(fn, delay = 300) {
-  let timer = null
-  return function (...args) {
-    if (timer) clearTimeout(timer)
-    timer = setTimeout(() => {
-      fn.apply(this, args)
-    }, delay)
-  }
 }
 
 // 空对象判断
@@ -236,11 +179,7 @@ module.exports = {
   parseTemperature,
   calcPM,
   parseWind,
-  parseCurrentTemp,
-  parseIndex,
-  isDaytime,
   getGreeting,
-  debounce,
   isEmptyObject,
   cmpVersion,
 }
