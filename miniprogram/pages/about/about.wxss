@@ -3,9 +3,27 @@
   background: #f0f4f8;
 }
 
+/* 自定义导航栏 */
+.nav-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+.nav-content {
+  height: 88rpx; display: flex; align-items: center; padding: 0 24rpx;
+  box-sizing: border-box;
+}
+.nav-back {
+  width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; margin-left: -8rpx;
+}
+.nav-back-icon { font-size: 48rpx; color: #333; font-weight: 300; line-height: 1; }
+.nav-title { flex: 1; text-align: center; font-size: 34rpx; font-weight: 600; color: #333; }
+.nav-placeholder { width: 64rpx; }
+
 .about-content {
   padding: 20rpx 24rpx;
-  padding-top: env(safe-area-inset-top);
+  padding-top: calc(env(safe-area-inset-top) + 88rpx + 20rpx);
 }
 
 /* 头部 */

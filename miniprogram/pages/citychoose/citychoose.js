@@ -1,8 +1,11 @@
 const staticData = require('../../data/staticData.js')
 const { isEmptyObject } = require('../../utils/weather')
 
+const app = getApp()
+
 Page({
   data: {
+    statusBarHeight: 0,
     cities: {},
     showItems: {},
     inputText: '',
@@ -14,8 +17,21 @@ Page({
   },
 
   onLoad() {
+    const sysInfo = app.globalData.systemInfo || {}
+    const statusBarHeight = sysInfo.statusBarHeight || 44
+    // rpx 转 px 比例：设计稿750rpx = 屏幕宽度px，所以 88rpx = 88 * screenWidth / 750
+    const rpxToPx = (sysInfo.screenWidth || 375) / 750
+    const navBarHeight = statusBarHeight + 88 * rpxToPx
+    this.setData({
+      statusBarHeight,
+      navBarHeight,
+    })
     const cities = this._getSorted(staticData.cities || [])
     this.setData({ cities, showItems: cities })
+  },
+
+  goBack() {
+    wx.navigateBack()
   },
 
   inputFilter(e) {

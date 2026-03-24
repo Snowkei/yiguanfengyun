@@ -1,5 +1,6 @@
 Page({
   data: {
+    statusBarHeight: 0,
     systemInfo: {},
     infoList: [
       { key: 'brand', name: '品牌' },
@@ -21,7 +22,12 @@ Page({
 
   onShow() {
     this.setData({
+      statusBarHeight: getApp().globalData.statusBarHeight || 44,
       systemInfo: getApp().globalData.systemInfo || {},
     })
+  },
+
+  goBack() {
+    wx.navigateBack()
   },
 })

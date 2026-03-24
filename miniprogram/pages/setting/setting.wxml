@@ -1,5 +1,16 @@
 <!-- 设置页 -->
 <view class="setting-page">
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+    <view class="nav-content">
+      <view class="nav-back" catchtap="goBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <view class="nav-title">设置</view>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
   <view class="setting-content">
 
     <!-- 显示设置 -->

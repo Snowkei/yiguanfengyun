@@ -1,8 +1,19 @@
 Page({
   data: {
+    statusBarHeight: 0,
     version: '2.0.0',
     projectAddress: 'https://github.com/Snowkei/yiguanfengyun',
     github: 'https://github.com/Snowkei',
+  },
+
+  onLoad() {
+    this.setData({
+      statusBarHeight: getApp().globalData.statusBarHeight || 44,
+    })
+  },
+
+  goBack() {
+    wx.navigateBack()
   },
 
   copy(e) {

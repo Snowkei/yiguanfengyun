@@ -3,6 +3,7 @@ const { cmpVersion } = require('../../utils/weather')
 
 Page({
   data: {
+    statusBarHeight: 0,
     setting: {},
     screenBrightness: '获取中',
     keepscreenon: false,
@@ -12,6 +13,7 @@ Page({
 
   onShow() {
     this.setData({
+      statusBarHeight: getApp().globalData.statusBarHeight || 44,
       keepscreenon: getApp().globalData.keepscreenon || false,
     })
     this._checkUpdateSupport()
@@ -73,6 +75,10 @@ Page({
         this.setData({ keepscreenon: b })
       },
     })
+  },
+
+  goBack() {
+    wx.navigateBack()
   },
 
   // NFC 检测

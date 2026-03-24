@@ -1,5 +1,16 @@
 <!-- 系统信息 -->
 <view class="sys-page">
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+    <view class="nav-content">
+      <view class="nav-back" catchtap="goBack">
+        <text class="nav-back-icon">‹</text>
+      </view>
+      <view class="nav-title">系统信息</view>
+      <view class="nav-placeholder"></view>
+    </view>
+  </view>
+
   <view class="sys-content">
     <view class="sys-card">
       <block wx:for="{{infoList}}" wx:key="key">

@@ -75,6 +75,17 @@ Page({
 
   onShow() {
     this.setData({ greeting: getGreeting() })
+    // 从城市选择页返回时，添加选中的城市
+    if (this.data._selectedCity) {
+      const cityName = this.data._selectedCity
+      this.setData({ _selectedCity: '', _cityChanged: false })
+      api.fetchWeatherByCity(cityName).then(data => {
+        const name = data.cityInfo ? data.cityInfo.name : cityName
+        const lat = data.cityInfo ? data.cityInfo.latitude : null
+        const lon = data.cityInfo ? data.cityInfo.longitude : null
+        this.addCity({ name, lat, lon })
+      }).catch(() => {})
+    }
   },
 
   // ========== 多城市 ==========
@@ -326,7 +337,7 @@ Page({
   // ========== 下拉刷新 ==========
   onPullDownRefresh() {
     this.setData({ refreshing: true })
-    this.loadWeatherForCity(this.data.activeCityIndex)
+    this._loadWeatherForRefresh(this.data.activeCityIndex)
     // 超时保护，防止刷新状态卡住
     if (this._refreshTimer) clearTimeout(this._refreshTimer)
     this._refreshTimer = setTimeout(() => {
@@ -334,6 +345,46 @@ Page({
         this.setData({ refreshing: false })
       }
     }, 10000)
+  },
+
+  // 刷新专用加载（不设 loading，避免内容消失）
+  _loadWeatherForRefresh(idx) {
+    const city = this.data.savedCities[idx]
+    if (!city) {
+      this.setData({ refreshing: false })
+      return
+    }
+
+    if (city.isLocation || !city.lat) {
+      api.fetchWeatherByLocation()
+        .then(data => {
+          const name = data.cityInfo ? data.cityInfo.name : '当前定位'
+          this._applyWeatherData(data, name)
+          if (data.cityInfo) {
+            const cities = [...this.data.savedCities]
+            cities[0] = { name, lat: data.cityInfo.latitude, lon: data.cityInfo.longitude, isLocation: true }
+            this.setData({ savedCities: cities })
+            storage.set('savedCities', cities)
+            this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
+          }
+          this.setData({ refreshing: false })
+        })
+        .catch(() => {
+          this.setData({ refreshing: false })
+          showError('天气刷新失败，请检查网络')
+        })
+    } else {
+      api.fetchWeather(city.lat, city.lon)
+        .then(data => {
+          this._applyWeatherData(data, city.name)
+          this._loadExtraData(city.lat, city.lon, data)
+          this.setData({ refreshing: false })
+        })
+        .catch(() => {
+          this.setData({ refreshing: false })
+          showError('天气刷新失败')
+        })
+    }
   },
 
   onShareAppMessage() {

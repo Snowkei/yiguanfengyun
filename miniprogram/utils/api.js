@@ -8,6 +8,53 @@
  * - 和风天气 API 获取生活指数（免费）
  */
 
+// ========== GCJ-02 → WGS84 坐标转换 ==========
+// wx.getLocation 返回 GCJ-02（火星坐标），Open-Meteo 需要 WGS84
+function _gcj02ToWgs84(lng, lat) {
+  const PI = 3.14159265358979324
+  const a = 6378245.0
+  const ee = 0.00669342162296594323
+
+  if (_outOfChina(lng, lat)) {
+    return { lng, lat }
+  }
+
+  let dLng = _transformLng(lng - 105.0, lat - 35.0)
+  let dLat = _transformLat(lng - 105.0, lat - 35.0)
+  const radLat = lat / 180.0 * PI
+  let magic = Math.sin(radLat)
+  magic = 1 - ee * magic * magic
+  const sqrtMagic = Math.sqrt(magic)
+  dLng = (dLng * 180.0) / (a / sqrtMagic * Math.cos(radLat) * PI)
+  dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * PI)
+
+  return { lng: lng - dLng, lat: lat - dLat }
+}
+
+function _outOfChina(lng, lat) {
+  return lng < 72.004 || lng > 137.8347 || lat < 0.8293 || lat > 55.8271
+}
+
+function _transformLat(lng, lat) {
+  const PI = 3.14159265358979324
+  let ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat +
+    0.1 * lng * lat + 0.2 * Math.sqrt(Math.abs(lng))
+  ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0
+  ret += (20.0 * Math.sin(lat * PI) + 40.0 * Math.sin(lat / 3.0 * PI)) * 2.0 / 3.0
+  ret += (160.0 * Math.sin(lat / 12.0 * PI) + 320.0 * Math.sin(lat * PI / 30.0)) * 2.0 / 3.0
+  return ret
+}
+
+function _transformLng(lng, lat) {
+  const PI = 3.14159265358979324
+  let ret = 300.0 + lng + 2.0 * lat + 0.1 * lng * lng +
+    0.1 * lng * lat + 0.1 * Math.sqrt(Math.abs(lng))
+  ret += (20.0 * Math.sin(6.0 * lng * PI) + 20.0 * Math.sin(2.0 * lng * PI)) * 2.0 / 3.0
+  ret += (20.0 * Math.sin(lng * PI) + 40.0 * Math.sin(lng / 3.0 * PI)) * 2.0 / 3.0
+  ret += (150.0 * Math.sin(lng / 12.0 * PI) + 300.0 * Math.sin(lng / 30.0 * PI)) * 2.0 / 3.0
+  return ret
+}
+
 // ========== WMO 天气代码 → 中文描述 ==========
 const WMO_CODES = {
   0: { text: '晴', icon: '☀️' },
@@ -410,13 +457,60 @@ function _doGetLocation(resolve, reject) {
   wx.getLocation({
     type: 'gcj02',
     success(loc) {
-      fetchWeather(loc.latitude, loc.longitude)
-        .then(resolve)
-        .catch(reject)
+      // GCJ-02 → WGS84 坐标转换（Open-Meteo 使用 WGS84）
+      const wgs = _gcj02ToWgs84(loc.longitude, loc.latitude)
+      const lat = wgs.lat
+      const lon = wgs.lng
+
+      // 同时获取天气和反向地理编码（城市名）
+      Promise.all([
+        fetchWeather(lat, lon),
+        _reverseGeocode(lat, lon),
+      ]).then(([weatherData, cityName]) => {
+        weatherData.cityInfo = {
+          name: cityName || '当前定位',
+          latitude: lat,
+          longitude: lon,
+        }
+        resolve(weatherData)
+      }).catch(() => {
+        // 天气获取成功即可，城市名失败不影响
+        fetchWeather(lat, lon).then(data => {
+          data.cityInfo = { name: '当前定位', latitude: lat, longitude: lon }
+          resolve(data)
+        }).catch(reject)
+      })
     },
-    fail(err) {
+    fail() {
       _fallbackToDefault(resolve, reject)
     },
+  })
+}
+
+// 反向地理编码：坐标 → 城市名
+function _reverseGeocode(lat, lon) {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: 'https://geocoding-api.open-meteo.com/v1/reverse',
+      data: {
+        latitude: lat,
+        longitude: lon,
+        language: 'zh',
+        count: 1,
+        format: 'json',
+      },
+      success(res) {
+        if (res.statusCode === 200 && res.data && res.data.results && res.data.results.length > 0) {
+          const r = res.data.results[0]
+          resolve(r.name || r.admin1 || '当前位置')
+        } else {
+          resolve('当前位置')
+        }
+      },
+      fail() {
+        resolve('当前位置')
+      },
+    })
   })
 }
 

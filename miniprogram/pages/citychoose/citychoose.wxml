@@ -1,6 +1,19 @@
 <!-- 城市选择 -->
 <view class="page">
   <view class="wrapper">
+    <!-- 自定义导航栏 -->
+    <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+      <view class="nav-content">
+        <view class="nav-back" catchtap="goBack">
+          <text class="nav-back-icon">‹</text>
+        </view>
+        <view class="nav-title">选择城市</view>
+        <view class="nav-placeholder"></view>
+      </view>
+    </view>
+    <!-- 占位：撑开固定导航栏的空间 -->
+    <view class="nav-bar-placeholder" style="height: {{navBarHeight}}px"></view>
+
     <view class="search-bar">
       <view class="search-inner">
         <image class="search-icon" src="/images/search_grey.png"></image>

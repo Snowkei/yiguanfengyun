@@ -5,10 +5,10 @@
   <view class="page-bg" style="{{bgStyle}}"></view>
 
   <!-- 骨架屏 -->
-  <skeleton wx:if="{{loading}}"></skeleton>
+  <skeleton wx:if="{{loading && !refreshing}}"></skeleton>
 
-  <!-- 正式内容 -->
-  <block wx:if="{{!loading}}">
+  <!-- 正式内容（加载完成或正在刷新时保留显示） -->
+  <block wx:if="{{!loading || refreshing}}">
 
     <!-- 顶部导航栏 -->
     <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
