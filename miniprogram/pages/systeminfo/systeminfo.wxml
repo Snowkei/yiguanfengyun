@@ -1,11 +1,13 @@
-<!--pages/systeminfo/systeminfo.wxml-->
-<view class="systeminfo">
-  <view class="brand">
-    <image src="/images/mobile.png"></image>
-    <text>{{systeminfoObj.brand}}</text>
-  </view>
-  <view class='item' wx:for='{{systeminfoArr}}' wx:key='{{index}}'>
-    <view class='key'>{{item.name}}</view>
-    <view class='value'>{{systeminfoObj[item.key]}}</view>
+<!-- 系统信息 -->
+<view class="sys-page">
+  <view class="sys-content">
+    <view class="sys-card">
+      <block wx:for="{{infoList}}" wx:key="key">
+        <view class="sys-item">
+          <text class="sys-label">{{item.name}}</text>
+          <text class="sys-value">{{systemInfo[item.key] || '--'}}{{item.unit || ''}}</text>
+        </view>
+      </block>
+    </view>
   </view>
 </view>

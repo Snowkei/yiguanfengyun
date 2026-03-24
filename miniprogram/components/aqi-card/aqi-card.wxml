@@ -1,0 +1,36 @@
+<!-- AQI 空气质量卡片 -->
+<view class="glass-card">
+  <view class="card-title">
+    <text class="icon">🌬️</text>
+    <text>空气质量</text>
+  </view>
+  <view class="aqi-main">
+    <view class="aqi-level" style="background: {{aqi.color}}">
+      <text class="aqi-value">{{aqi.val || '--'}}</text>
+      <text class="aqi-desc">{{aqi.desc || '--'}}</text>
+    </view>
+    <view class="aqi-detail">
+      <text class="aqi-tip">{{aqi.detail || ''}}</text>
+      <view class="aqi-bar">
+        <view class="aqi-bar-track">
+          <view class="aqi-bar-fill" style="width: {{aqiPercent}}%; background: {{aqi.color}}"></view>
+        </view>
+        <view class="aqi-bar-labels">
+          <text>优</text>
+          <text>良</text>
+          <text>轻度</text>
+          <text>中度</text>
+          <text>重度</text>
+          <text>严重</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <!-- 污染物 -->
+  <view class="pollutants" wx:if="{{pollutants.length > 0}}">
+    <view class="pollutant" wx:for="{{pollutants}}" wx:key="key">
+      <view class="pollutant-name">{{item.key}}</view>
+      <view class="pollutant-value" style="color: {{item.color}}">{{item.value}}</view>
+    </view>
+  </view>
+</view>

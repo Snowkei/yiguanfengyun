@@ -1,0 +1,51 @@
+.hourly-scroll {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.hourly-list {
+  display: flex;
+  padding: 10rpx 0;
+}
+
+.hourly-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 110rpx;
+  padding: 16rpx 8rpx;
+  border-radius: 20rpx;
+  margin-right: 4rpx;
+  transition: all 0.3s ease;
+}
+
+.hourly-item.current {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 6rpx 20rpx rgba(102, 126, 234, 0.3);
+}
+
+.hourly-item .time {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
+.hourly-item.current .time {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.hourly-item .icon-text {
+  font-size: 40rpx;
+  margin-bottom: 12rpx;
+}
+
+.hourly-item .temp {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.hourly-item.current .temp {
+  color: #fff;
+}

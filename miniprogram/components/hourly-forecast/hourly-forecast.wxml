@@ -1,0 +1,16 @@
+<!-- 24小时预报 -->
+<view class="glass-card">
+  <view class="card-title">
+    <text class="icon">🕐</text>
+    <text>逐时预报</text>
+  </view>
+  <scroll-view scroll-x class="hourly-scroll" enable-flex>
+    <view class="hourly-list">
+      <view class="hourly-item {{index === 0 ? 'current' : ''}}" wx:for="{{hourlyData}}" wx:key="index">
+        <view class="time">{{item.time}}</view>
+        <view class="icon-text">{{item.icon}}</view>
+        <view class="temp">{{item.temp}}°</view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

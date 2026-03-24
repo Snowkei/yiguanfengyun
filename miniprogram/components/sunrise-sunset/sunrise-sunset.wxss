@@ -1,0 +1,35 @@
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx;
+  border-radius: 16rpx;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.detail-icon {
+  font-size: 36rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-label {
+  font-size: 20rpx;
+  color: #bbb;
+  margin-bottom: 4rpx;
+}
+
+.detail-value {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}

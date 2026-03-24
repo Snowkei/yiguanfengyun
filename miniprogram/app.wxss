@@ -1,9 +1,220 @@
-Page {
-  background: #f4f6f9;
+/**
+ * 易观风云 - 全局样式
+ * 现代化设计系统
+ */
+
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', 'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  color: #333;
+  background: #f0f4f8;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* 隐藏滚动条 */
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* 安全区适配 */
 .iphonex-padding {
-  padding-bottom: 68rpx;
+  padding-bottom: 68rpx !important;
 }
+
+/* ============ 通用组件 ============ */
+
+/* 玻璃卡片 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24rpx;
+  margin: 0 24rpx 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-card-dark {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24rpx;
+  margin: 0 24rpx 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.15);
+  border: 1rpx solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* 卡片标题 */
+.card-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.card-title .icon {
+  margin-right: 10rpx;
+  font-size: 28rpx;
+}
+
+/* 暗色卡片标题 */
+.card-title-light {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 分割线 */
+.divider {
+  height: 1rpx;
+  background: rgba(0, 0, 0, 0.06);
+  margin: 20rpx 0;
+}
+
+.divider-light {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 骨架屏动画 */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8rpx;
+}
+
+/* 淡入动画 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* 缩放动画 */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.scale-in {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* 自定义导航栏 */
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: env(safe-area-inset-top);
+}
+
+.custom-nav .nav-content {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+}
+
+.custom-nav .nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.custom-nav .nav-title-light {
+  color: #fff;
+}
+
+/* 按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  padding: 0 48rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+/* 标签 */
+.tag {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.tag-success {
+  background: rgba(0, 228, 0, 0.1);
+  color: #00e400;
+}
+
+.tag-warning {
+  background: rgba(255, 126, 0, 0.1);
+  color: #ff7e00;
+}
+
+.tag-danger {
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff0000;
+}
+
+/* 工具类 */
+.text-center { text-align: center; }
+.text-light { color: rgba(255, 255, 255, 0.7); }
+.text-white { color: #fff; }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-column { display: flex; flex-direction: column; }
+.flex-1 { flex: 1; }
+.font-bold { font-weight: 600; }
+.font-light { font-weight: 300; }
+.text-sm { font-size: 22rpx; }
+.text-lg { font-size: 36rpx; }
+.text-xl { font-size: 48rpx; }

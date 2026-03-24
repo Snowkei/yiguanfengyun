@@ -1,0 +1,20 @@
+<!-- 生活指数 -->
+<view class="glass-card">
+  <view class="card-title">
+    <text class="icon">💡</text>
+    <text>生活指数</text>
+  </view>
+  <view class="indices-grid">
+    <view class="index-item" wx:for="{{indexData}}" wx:key="index" bindtap="toggleDetail" data-index="{{index}}">
+      <view class="index-icon">{{item.icon}}</view>
+      <view class="index-name">{{item.tipt}}</view>
+      <view class="index-value">{{item.zs}}</view>
+    </view>
+  </view>
+  <!-- 展开详情 -->
+  <view class="index-detail" wx:if="{{expandedIndex !== null}}">
+    <view class="detail-content">
+      <text>{{indexData[expandedIndex].des}}</text>
+    </view>
+  </view>
+</view>

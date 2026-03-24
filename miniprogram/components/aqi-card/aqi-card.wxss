@@ -1,0 +1,89 @@
+.aqi-main {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.aqi-level {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 30rpx;
+  flex-shrink: 0;
+}
+
+.aqi-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.aqi-desc {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 4rpx;
+}
+
+.aqi-detail {
+  flex: 1;
+}
+
+.aqi-tip {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.aqi-bar-track {
+  height: 10rpx;
+  border-radius: 5rpx;
+  background: linear-gradient(to right, #00e400, #ffff00, #ff7e00, #ff0000, #99004c, #7e0023);
+  overflow: hidden;
+  margin-bottom: 8rpx;
+}
+
+.aqi-bar-fill {
+  height: 100%;
+  border-radius: 5rpx;
+  opacity: 0.3;
+}
+
+.aqi-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18rpx;
+  color: #ccc;
+}
+
+.pollutants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+
+.pollutant {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100rpx;
+  flex: 1;
+}
+
+.pollutant-name {
+  font-size: 20rpx;
+  color: #999;
+  margin-bottom: 8rpx;
+}
+
+.pollutant-value {
+  font-size: 28rpx;
+  font-weight: 600;
+}

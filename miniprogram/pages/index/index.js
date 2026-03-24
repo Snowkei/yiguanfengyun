@@ -1,597 +1,389 @@
-// 天气质量
-// pm2.5 浓度对应的指数等级
-// 0-50 优
-// 50-100 良
-// 100-150 轻度污染：对敏感人群不健康
-// 150-200 中度污染：不健康
-// 200-300 重度污染：非常不健康
-// 300-500 严重污染：有毒物
-// 500以上 爆表：有毒物
-let messages = require('../../data/messages.js')
-let bmap = require('../../lib/bmap-wx.js')
-let utils = require('../../utils/utils')
-let globalData = getApp().globalData
-let SYSTEMINFO = globalData.systeminfo
-Page({
+/**
+ * 易观风云 - 主页面
+ * 全新架构的天气展示
+ */
+const bmap = require('../../lib/bmap-wx.js')
+const weather = require('../../utils/weather.js')
+const { cache, showError, storage } = require('../../utils/helpers')
+const { getWeatherIcon, getWeatherGradient, formatDate, calcPM, parseCurrentTemp, getGreeting, parseIndex } = weather
 
-  /**
-   * 页面的初始数据
-   */
+const app = getApp()
+
+Page({
   data: {
-    isIPhoneX: globalData.isIPhoneX,
-    messages: '',
-    cityDatas: {},
-    icon: ['/images/clothing.png', '/images/carwashing.png', '/images/pill.png', '/images/running.png', '/images/sun.png'],
-    // 清空input
+    // 状态
+    loading: true,
+    refreshing: false,
+    statusBarHeight: 0,
+    isIPhoneX: false,
+
+    // 天气数据
+    cityName: '定位中...',
+    updateTime: '',
+    currentTemp: '--',
+    currentWeather: '',
+    currentIcon: '',
+    greeting: '',
+    pm: {},
+    hourlyData: [],
+    weatherData: [],
+    indexData: [],
+
+    // 详情
+    feelsLike: '',
+    humidity: '',
+    windDir: '',
+    visibility: '',
+    uvIndex: '',
+    sunrise: '06:12',
+    sunset: '18:35',
+    pressure: '',
+    rainChance: '',
+
+    // 背景
+    gradientColors: ['#667eea', '#764ba2'],
+    bgStyle: '',
+
+    // 搜索
     searchText: '',
-    // 是否已经弹出
+    searchFocused: false,
+
+    // 背景图片选择
+    bcgImgAreaShow: false,
+    bcgImgIndex: 0,
+    bcgImgList: [
+      { src: '/images/beach.jpg', topColor: '#393836' },
+      { src: '/images/clouds.jpg', topColor: '#0085e5' },
+      { src: '/images/sunset.jpg', topColor: '#2d2225' },
+      { src: '/images/clear-sky.jpg', topColor: '#004a89' },
+    ],
+    bcgImg: '',
+
+    // 悬浮菜单
     hasPopped: false,
+    pos: {},
     animationMain: {},
     animationOne: {},
     animationTwo: {},
     animationThree: {},
-    // 是否切换了城市
-    cityChanged: false,
-    // 需要查询的城市
-    searchCity: '',
-    setting: {},
-    // 背景图片
-    bcgImgList: [
-      {
-        // src: '/images/beach-bird-birds-235787.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116095027782.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#393836'
-      },
-      {
-        // src: '/images/clouds-forest-idyllic-417102.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116095103114.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#0085e5'
-      },
-      {
-        // src: '/images/backlit-dawn-dusk-327466.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116094945216.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#2d2225'
-      },
-      {
-        // src: '/images/accomplishment-adventure-clear-sky-585825.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116094840261.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#004a89'
-      },
-      {
-        // src: '/images/fog-himalayas-landscape-38326.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116095116779.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#b8bab9'
-      },
-      {
-        // src: '/images/asphalt-blue-sky-clouds-490411.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116094928309.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#009ffe'
-      },
-      {
-        // src: '/images/aerial-climate-cold-296559.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116094920753.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#d6d1e6'
-      },
-      {
-        // src: '/images/beautiful-cold-dawn-547115.jpg',
-        src:'https://img-blog.csdnimg.cn/20191116095043885.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQyNjI0ODg0,size_16,color_FFFFFF,t_70',
-        topColor: '#ffa5bc'
-      }
-    ],
-    bcgImgIndex: 0,
-    bcgImg: '',
-    bcgImgAreaShow: false,
-    bcgColor: '#2d2225',
-    // 粗暴直接：移除后再创建，达到初始化组件的作用
-    showHeartbeat: true,
-    // heartbeat 时禁止搜索，防止动画执行
     enableSearch: true,
-    pos: {},
-    openSettingButtonShow: false,
+    showHeartbeat: true,
+
+    // 设置
+    setting: {},
   },
-  calcPM(value) {
-    if (value > 0 && value <= 50) {
-      return {
-        val: value,
-        desc: '优',
-        detail: '',
-      }
-    } else if (value > 50 && value <= 100) {
-      return {
-        val: value,
-        desc: '良',
-        detail: '',
-      }
-    } else if (value > 100 && value <= 150) {
-      return {
-        val: value,
-        desc: '轻度污染',
-        detail: '对敏感人群不健康',
-      }
-    } else if (value > 150 && value <= 200) {
-      return {
-        val: value,
-        desc: '中度污染',
-        detail: '不健康',
-      }
-    } else if (value > 200 && value <= 300) {
-      return {
-        val: value,
-        desc: '重度污染',
-        detail: '非常不健康',
-      }
-    } else if (value > 300 && value <= 500) {
-      return {
-        val: value,
-        desc: '严重污染',
-        detail: '有毒物',
-      }
-    } else if (value > 500) {
-      return {
-        val: value,
-        desc: '爆表',
-        detail: '能出来的都是条汉子',
-      }
+
+  onLoad() {
+    const sysInfo = app.globalData.systemInfo
+    this.setData({
+      statusBarHeight: app.globalData.statusBarHeight,
+      isIPhoneX: app.globalData.isIPhoneX,
+    })
+    this.initData()
+  },
+
+  onShow() {
+    // 检查城市是否切换
+    const pages = getCurrentPages()
+    const currentPage = pages[pages.length - 1]
+    if (currentPage && currentPage.data._cityChanged) {
+      const cityName = currentPage.data._selectedCity
+      currentPage.setData({ _cityChanged: false, _selectedCity: '' })
+      this.searchCity(cityName)
     }
+
+    this.setData({ greeting: getGreeting() })
+    this.setMenuPosition()
   },
-  success(data) {
-    this.setData({
-      openSettingButtonShow: false,
-    })
-    wx.stopPullDownRefresh()
-    let now = new Date()
-    // 存下来源数据
-    data.updateTime = now.getTime()
-    data.updateTimeFormat = utils.formatDate(now, "MM-dd hh:mm")
-    let results = data.originalData.results[0] || {}
-    data.pm = this.calcPM(results['pm25'])
-    // 当天实时温度
-    data.temperature = `${results.weather_data[0].date.match(/\d+/g)[2]}`
-    wx.setStorage({
-      key: 'cityDatas',
-      data: data,
-    })
-    this.setData({
-      cityDatas: data,
+
+  // ========== 数据初始化 ==========
+  initData() {
+    // 尝试从缓存读取
+    const cached = storage.get('cityDatas')
+    if (cached && cached.originalData) {
+      this.processWeatherData(cached)
+    }
+    // 从定位获取
+    this.fetchWeatherByLocation()
+  },
+
+  // 通过定位获取天气
+  fetchWeatherByLocation() {
+    const BMap = new bmap.BMapWX({ ak: app.globalData.ak })
+
+    BMap.weather({
+      location: '', // 空字符串=自动定位
+      success: (data) => {
+        this.processWeatherData(data)
+        this.setData({ loading: false, refreshing: false })
+        // 缓存
+        storage.set('cityDatas', data)
+      },
+      fail: (err) => {
+        this.setData({ loading: false, refreshing: false })
+        showError('定位失败，请检查权限设置')
+      },
     })
   },
-  commitSearch(res) {
-    let val = ((res.detail || {}).value || '').replace(/\s+/g, '')
-    this.search(val)
-  },
-  dance() {
+
+  // 处理天气数据
+  processWeatherData(data) {
+    if (!data || !data.originalData) return
+
+    const results = data.originalData.results[0] || {}
+    const currentCity = results.currentCity || '未知城市'
+    const weatherData = results.weather_data || []
+    const indexArr = results.index || []
+    const pm25 = results.pm25 || 0
+
+    // 当前天气
+    const current = weatherData[0] || {}
+    const currentTemp = parseCurrentTemp(current.date)
+    const currentWeather = current.weather || '--'
+    const currentIcon = getWeatherIcon(currentWeather)
+
+    // 背景渐变
+    const gradient = getWeatherGradient(currentWeather)
+    const bgStyle = `background: linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 100%)`
+
+    // PM2.5
+    const pm = calcPM(pm25)
+
+    // 生成24小时预报（模拟）
+    const hourlyData = this._generateHourlyForecast(currentTemp, currentWeather)
+
+    // 风向风力
+    const windInfo = current.wind || '--'
+
+    // 生活指数
+    const indexData = parseIndex(indexArr)
+
+    // 更新时间
+    const now = new Date()
+    const updateTime = formatDate(now, 'MM-dd hh:mm')
+
     this.setData({
-      enableSearch: false,
+      cityName: currentCity,
+      currentTemp,
+      currentWeather,
+      currentIcon,
+      gradientColors: gradient,
+      bgStyle,
+      pm,
+      hourlyData,
+      weatherData,
+      indexData,
+      windDir: windInfo,
+      updateTime,
+      loading: false,
+      refreshing: false,
     })
-    let heartbeat = this.selectComponent('#heartbeat')
-    heartbeat.dance(() => {
-      this.setData({
-        showHeartbeat: false,
-        enableSearch: true,
+  },
+
+  // 生成24小时预报（根据当日天气模拟）
+  _generateHourlyForecast(currentTemp, weatherType) {
+    const now = new Date()
+    const currentHour = now.getHours()
+    const baseTemp = parseInt(currentTemp) || 20
+    const hourly = []
+    const icon = getWeatherIcon(weatherType)
+
+    for (let i = 0; i < 24; i++) {
+      const hour = (currentHour + i) % 24
+      // 模拟温度变化曲线
+      const hourFactor = Math.sin((hour - 6) / 24 * Math.PI * 2) * 0.5 + 0.5
+      const temp = Math.round(baseTemp - 4 + hourFactor * 8 + (Math.random() - 0.5) * 2)
+      const timeLabel = i === 0 ? '现在' : `${hour.toString().padStart(2, '0')}:00`
+
+      hourly.push({
+        time: timeLabel,
+        temp: temp,
+        icon: icon,
       })
-      this.setData({
-        showHeartbeat: true,
-      })
+    }
+    return hourly
+  },
+
+  // 搜索城市
+  searchCity(cityName) {
+    if (!cityName || !cityName.trim()) return
+    this.setData({ loading: true })
+
+    const BMap = new bmap.BMapWX({ ak: app.globalData.ak })
+
+    // 先地理编码
+    wx.request({
+      url: app.getGeocoderUrl(cityName),
+      success: (res) => {
+        const data = res.data || {}
+        if (!data.status) {
+          const location = (data.result || {}).location || {}
+          const locStr = `${location.lng},${location.lat}`
+          BMap.weather({
+            location: locStr,
+            success: (wData) => {
+              this.processWeatherData(wData)
+              this.setData({ loading: false })
+              storage.set('cityDatas', wData)
+            },
+            fail: () => {
+              this.setData({ loading: false })
+              showError('获取天气数据失败')
+            },
+          })
+        } else {
+          this.setData({ loading: false })
+          showError('未找到该城市')
+        }
+      },
+      fail: () => {
+        this.setData({ loading: false })
+        showError('网络不给力，请稍后再试')
+      },
     })
   },
-  search(val) {
+
+  // 搜索确认
+  onSearchConfirm(e) {
+    const val = (e.detail.value || '').replace(/\s+/g, '')
+    if (!val) return
+
+    // 彩蛋
     if (val === '520' || val === '521') {
-      this.setData({
-        searchText: '',
-      })
+      this.setData({ searchText: '' })
       this.dance()
       return
     }
-    wx.pageScrollTo({
-      scrollTop: 0,
-      duration: 300,
-    })
-    if (val) {
-      this.geocoder(val, (loc) => {
-        this.init({
-          location: `${loc.lng},${loc.lat}`
-        })
-      })
-    }
+
+    this.searchCity(val)
+    this.setData({ searchText: '' })
   },
-  // 地理位置编码
-  geocoder(address, success) {
-    wx.request({
-      url: getApp().setGeocoderUrl(address),
-      success(res) {
-        let data = res.data || {}
-        if (!data.status) {
-          let location = (data.result || {}).location || {}
-          // location = {lng, lat}
-          success && success(location)
-        } else {
-          wx.showToast({
-            title: data.msg || '网络不给力，请稍后再试',
-            icon: 'none',
-          })
-        }
-      },
-      fail(res) {
-        wx.showToast({
-          title: res.errMsg || '网络不给力，请稍后再试',
-          icon: 'none',
-        })
-      },
-      complete: () => {
-        this.setData({
-          searchText: '',
-        })
-      },
-    })
+
+  onSearchFocus() {
+    this.setData({ searchFocused: true })
   },
-  fail(res) {
-    wx.stopPullDownRefresh()
-    let errMsg = res.errMsg || ''
-    // 拒绝授权地理位置权限
-    if (errMsg.indexOf('deny') !== -1 || errMsg.indexOf('denied') !== -1) {
-      wx.showToast({
-        title: '需要开启地理位置权限',
-        icon: 'none',
-        duration: 2500,
-        success: (res) => {
-          if (this.canUseOpenSettingApi()) {
-            let timer = setTimeout(() => {
-              clearTimeout(timer)
-              wx.openSetting({})
-            }, 2500)
-          } else {
-            this.setData({
-              openSettingButtonShow: true,
-            })
-          }
-        },
-      })
-    } else {
-      wx.showToast({
-        title: '网络不给力，请稍后再试',
-        icon: 'none',
-      })
-    }
+
+  onSearchBlur() {
+    this.setData({ searchFocused: false })
   },
-  // wx.openSetting 要废弃，button open-type openSetting 2.0.7 后支持
-  // 使用 wx.canIUse('openSetting') 都会返回 true，这里判断版本号区分
-  canUseOpenSettingApi() {
-    let systeminfo = getApp().globalData.systeminfo
-    let SDKVersion = systeminfo.SDKVersion
-    let version = utils.cmpVersion(SDKVersion, '2.0.7')
-    if (version < 0) {
-      return true
-    } else {
-      return false
-    }
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.setData({ refreshing: true })
+    this.fetchWeatherByLocation()
   },
-  init(params) {
-    let BMap = new bmap.BMapWX({
-      ak: globalData.ak,
-    })
-    BMap.weather({
-      location: params.location,
-      fail: this.fail,
-      success: this.success,
-    })
-  },
-  // drawWeather () {
-  //   let context = wx.createCanvasContext('line')
-  //   context.setStrokeStyle("#ffffff")
-  //   context.setLineWidth(1)
-  //   context.moveTo(0, 0)
-  //   context.lineTo(350, 150)
-  //   context.stroke()
-  //   context.draw()
-  // },
-  onPullDownRefresh(res) {
-    this.init({})
-  },
-  setMenuPosition() {
-    wx.getStorage({
-      key: 'pos',
-      success: (res) => {
-        this.setData({
-          pos: res.data,
-        })
-      },
-      fail: (res) => {
-        this.setData({
-          pos: {},
-        })
-      },
-    })
-  },
-  getCityDatas() {
-    let cityDatas = wx.getStorage({
-      key: 'cityDatas',
-      success: (res) => {
-        this.setData({
-          cityDatas: res.data,
-        })
-      },
-    })
-  },
-  setBcgImg(index) {
-    if (index !== undefined) {
-      this.setData({
-        bcgImgIndex: index,
-        bcgImg: this.data.bcgImgList[index].src,
-        bcgColor: this.data.bcgImgList[index].topColor,
-      })
-      this.setNavigationBarColor()
-      return
-    }
-    wx.getStorage({
-      key: 'bcgImgIndex',
-      success: (res) => {
-        let bcgImgIndex = res.data || 0
-        this.setData({
-          bcgImgIndex,
-          bcgImg: this.data.bcgImgList[bcgImgIndex].src,
-          bcgColor: this.data.bcgImgList[bcgImgIndex].topColor,
-        })
-        this.setNavigationBarColor()
-      },
-      fail: () => {
-        this.setData({
-          bcgImgIndex: 0,
-          bcgImg: this.data.bcgImgList[0].src,
-          bcgColor: this.data.bcgImgList[0].topColor,
-        })
-        this.setNavigationBarColor()
-      },
-    })
-  },
-  setNavigationBarColor(color) {
-    let bcgColor = color || this.data.bcgColor
-    wx.setNavigationBarColor({
-      frontColor: '#ffffff',
-      backgroundColor: this.data.bcgColor,
-    })
-  },
-  onShow() {
-    this.setBcgImg()
-    this.getCityDatas()
-    this.setMenuPosition()
-    this.setNavigationBarColor('#2d2225')
-    // this.setBcg()
-    this.initSetting((setting) => {
-      this.checkUpdate(setting)
-    })
-    if (!this.data.cityChanged) {
-      this.init({})
-    } else {
-      this.search(this.data.searchCity)
-      this.setData({
-        cityChanged: false,
-        searchCity: '',
-      })
-    }
-    this.setData({
-      message: messages.messages(),
-    })
-  },
-  onHide() {
-    wx.setStorage({
-      key: 'pos',
-      data: this.data.pos,
-    })
-  },
-  checkUpdate(setting) {
-    // 兼容低版本
-    if (!setting.forceUpdate || !wx.getUpdateManager) {
-      return
-    }
-    let updateManager = wx.getUpdateManager()
-    updateManager.onCheckForUpdate((res) => {
-      console.error(res)
-    })
-    updateManager.onUpdateReady(function () {
-      wx.showModal({
-        title: '更新提示',
-        content: '新版本已下载完成，是否重启应用？',
-        success: function (res) {
-          if (res.confirm) {
-            updateManager.applyUpdate()
-          }
-        }
-      })
-    })
-  },
+
+  // ========== 背景图 ==========
   showBcgImgArea() {
-    this.setData({
-      bcgImgAreaShow: true,
-    })
+    this.setData({ bcgImgAreaShow: true })
   },
+
   hideBcgImgArea() {
+    this.setData({ bcgImgAreaShow: false })
+  },
+
+  chooseBcg(e) {
+    const { index, src } = e.currentTarget.dataset
     this.setData({
+      bcgImgIndex: index,
+      bcgImg: src,
       bcgImgAreaShow: false,
     })
+    storage.set('bcgImgIndex', index)
   },
-  chooseBcg(e) {
-    let dataset = e.currentTarget.dataset
-    let src = dataset.src
-    let index = dataset.index
-    this.setBcgImg(index)
-    wx.setStorage({
-      key: 'bcgImgIndex',
-      data: index,
-    })
+
+  // ========== 心跳动画 ==========
+  dance() {
+    this.setData({ enableSearch: false, showHeartbeat: false })
+    setTimeout(() => {
+      this.setData({ enableSearch: true, showHeartbeat: true })
+    }, 6000)
   },
-  // setBcg () {
-  //   wx.getSavedFileList({
-  //     success: (res) => {
-  //       let fileList = res.fileList
-  //       if (!utils.isEmptyObject(fileList)) {
-  //         this.setData({
-  //           bcgImg: fileList[0].filePath,
-  //         })
-  //       } else {
-  //         this.setData({
-  //           bcgImg: '',
-  //         })
-  //       }
-  //     },
-  //   })
-  // },
-  initSetting(successFunc) {
-    wx.getStorage({
-      key: 'setting',
-      success: (res) => {
-        let setting = res.data || {}
-        this.setData({
-          setting,
-        })
-        successFunc && successFunc(setting)
-      },
-      fail: () => {
-        this.setData({
-          setting: {},
-        })
-      },
-    })
-  },
-  onShareAppMessage(res) {
-    return {
-      title: 'Quiet Weather--安静天气',
-      path: `/pages/index/index`,
-      // imageUrl: '',
-      success() { },
-      fail(e) {
-        let errMsg = e.errMsg || ''
-        // 对不是用户取消转发导致的失败进行提示
-        let msg = '分享失败，可重新分享'
-        if (errMsg.indexOf('cancel') !== -1) {
-          msg = '取消分享'
-        }
-        wx.showToast({
-          title: msg,
-          icon: 'none',
-        })
-      }
-    }
-  },
-  // 悬浮菜单 切换
-  menuMainMove(e) {
-    // 如果已经弹出来了，需要先收回去，否则会受 top、left 会影响
-    if (this.data.hasPopped) {
-      this.takeback()
-      this.setData({
-        hasPopped: false,
-      })
-    }
-    let windowWidth = SYSTEMINFO.windowWidth
-    let windowHeight = SYSTEMINFO.windowHeight
-    let touches = e.touches[0]
-    let clientX = touches.clientX
-    let clientY = touches.clientY
-    // 边界判断
-    if (clientX > windowWidth - 40) {
-      clientX = windowWidth - 40
-    }
-    if (clientX <= 90) {
-      clientX = 90
-    }
-    if (clientY > windowHeight - 40 - 60) {
-      clientY = windowHeight - 40 - 60
-    }
-    if (clientY <= 60) {
-      clientY = 60
-    }
-    let pos = {
-      left: clientX,
-      top: clientY,
-    }
-    this.setData({
-      pos,
-    })
-  },
+
+  // ========== 悬浮菜单 ==========
   menuMain() {
     if (!this.data.hasPopped) {
       this.popp()
-      this.setData({
-        hasPopped: true,
-      })
+      this.setData({ hasPopped: true })
     } else {
       this.takeback()
-      this.setData({
-        hasPopped: false,
-      })
+      this.setData({ hasPopped: false })
     }
   },
+
   menuOne() {
     this.menuMain()
-    wx.navigateTo({
-      url: '/pages/citychoose/citychoose',
-    })
+    wx.navigateTo({ url: '/pages/citychoose/citychoose' })
   },
+
   menuTwo() {
     this.menuMain()
-    wx.navigateTo({
-      url: '/pages/setting/setting',
-    })
+    wx.navigateTo({ url: '/pages/setting/setting' })
   },
+
   menuThree() {
     this.menuMain()
-    wx.navigateTo({
-      url: '/pages/about/about',
-    })
+    wx.navigateTo({ url: '/pages/about/about' })
   },
+
   popp() {
-    let animationMain = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationOne = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationTwo = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationThree = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    animationMain.rotateZ(180).step()
-    animationOne.translate(-50, -60).rotateZ(360).opacity(1).step()
-    animationTwo.translate(-90, 0).rotateZ(360).opacity(1).step()
-    animationThree.translate(-50, 60).rotateZ(360).opacity(1).step()
+    const a = (dur = 200) => wx.createAnimation({ duration: dur, timingFunction: 'ease-out' })
+    let main = a(), one = a(), two = a(), three = a()
+    main.rotateZ(180).step()
+    one.translate(-50, -60).rotateZ(360).opacity(1).step()
+    two.translate(-90, 0).rotateZ(360).opacity(1).step()
+    three.translate(-50, 60).rotateZ(360).opacity(1).step()
     this.setData({
-      animationMain: animationMain.export(),
-      animationOne: animationOne.export(),
-      animationTwo: animationTwo.export(),
-      animationThree: animationThree.export(),
+      animationMain: main.export(),
+      animationOne: one.export(),
+      animationTwo: two.export(),
+      animationThree: three.export(),
     })
   },
+
   takeback() {
-    let animationMain = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationOne = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationTwo = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    let animationThree = wx.createAnimation({
-      duration: 200,
-      timingFunction: 'ease-out'
-    })
-    animationMain.rotateZ(0).step();
-    animationOne.translate(0, 0).rotateZ(0).opacity(0).step()
-    animationTwo.translate(0, 0).rotateZ(0).opacity(0).step()
-    animationThree.translate(0, 0).rotateZ(0).opacity(0).step()
+    const a = (dur = 200) => wx.createAnimation({ duration: dur, timingFunction: 'ease-out' })
+    let main = a(), one = a(), two = a(), three = a()
+    main.rotateZ(0).step()
+    one.translate(0, 0).rotateZ(0).opacity(0).step()
+    two.translate(0, 0).rotateZ(0).opacity(0).step()
+    three.translate(0, 0).rotateZ(0).opacity(0).step()
     this.setData({
-      animationMain: animationMain.export(),
-      animationOne: animationOne.export(),
-      animationTwo: animationTwo.export(),
-      animationThree: animationThree.export(),
+      animationMain: main.export(),
+      animationOne: one.export(),
+      animationTwo: two.export(),
+      animationThree: three.export(),
     })
+  },
+
+  menuMainMove(e) {
+    if (this.data.hasPopped) {
+      this.takeback()
+      this.setData({ hasPopped: false })
+    }
+    const sysInfo = app.globalData.systemInfo
+    const ww = sysInfo.windowWidth
+    const wh = sysInfo.windowHeight
+    const touches = e.touches[0]
+    let x = Math.min(ww - 40, Math.max(90, touches.clientX))
+    let y = Math.min(wh - 100, Math.max(60, touches.clientY))
+    this.setData({ pos: { left: x, top: y } })
+  },
+
+  setMenuPosition() {
+    const pos = storage.get('pos', { left: 0, top: 0 })
+    this.setData({ pos })
+  },
+
+  onHide() {
+    storage.set('pos', this.data.pos)
+  },
+
+  // ========== 分享 ==========
+  onShareAppMessage() {
+    return {
+      title: `${this.data.cityName} ${this.data.currentTemp}° ${this.data.currentWeather} - 易观风云`,
+      path: '/pages/index/index',
+    }
   },
 })

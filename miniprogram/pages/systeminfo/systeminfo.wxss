@@ -1,46 +1,38 @@
-/* pages/systeminfo/systeminfo.wxss */
-.systeminfo {
-  padding: 0 30rpx 0 30rpx;
+.sys-page {
+  min-height: 100vh;
+  background: #f0f4f8;
+}
+
+.sys-content {
+  padding: 20rpx 24rpx;
+  padding-top: env(safe-area-inset-top);
+}
+
+.sys-card {
   background: #fff;
-  margin-bottom: 20rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
 }
-.brand {
-  font-family: DINCondensed-Bold;
-  height: 300rpx;
-  font-size: 100rpx;
-  color: #40a7e7;
+
+.sys-item {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-.brand image {
-  width: 100rpx;
-  height: 100rpx;
-  margin-right: 20rpx;
-}
-.brand text {
-  line-height: 1em;
-}
-.systeminfo .item {
-  display: flex;
-  flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
-  font-size: 30rpx;
-  color: #000;
-  padding: 30rpx 15rpx;
-  height: 62rpx;
-  border-top: 1rpx solid #efefef;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #f5f5f5;
 }
-.systeminfo .item:last-child {
+
+.sys-item:last-child {
   border-bottom: none;
 }
-.systeminfo .item .key {
-  line-height: 1em;
+
+.sys-label {
+  font-size: 28rpx;
+  color: #666;
 }
-.systeminfo .item .value {
-  font-size: 24rpx;
-  line-height: 1em;
-  color: #777;
+
+.sys-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 500;
 }

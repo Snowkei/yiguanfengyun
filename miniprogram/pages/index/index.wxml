@@ -1,86 +1,139 @@
-<!-- 主界面 -->
-<view class="container {{isIPhoneX ? 'iphonex-padding' : ''}}">
-  <heartbeat id='heartbeat' wx:if='{{showHeartbeat}}'></heartbeat>
-  <view class='bcg' wx:if='{{!bcgImg}}' style='background: {{bcgColor}}'></view>
-  <image class='bcg' wx:if='{{bcgImg}}' src='{{bcgImg}}' mode='aspectFill'></image>
-  <!-- 查询其他城市 -->
-  <view class='search' wx:if='{{!setting.hiddenSearch && !bcgImgAreaShow}}' style='background:rgba(255, 255, 255, 0)'>
-    <view class='wrapper'>
-      <image src='/images/search.png'></image>
-      <input placeholder-class='placeholderClass' confirm-type='search' placeholder='查询其他城市' maxlength='20' bindconfirm='commitSearch' value='{{searchText}}' disabled='{{!enableSearch}}'></input>
-    </view>
-  </view>
-	<!-- 背景图 -->
-  <view class='chooseBcg' wx:if='{{bcgImgAreaShow}}'>
-    <view class='top'>
-      <view class='title'>更换背景</view>
-      <view class='bcgs'>
-        <view class='border {{bcgImgIndex === index ? "active" : ""}}' wx:for='{{bcgImgList}}' wx:key='{{index}}'>
-          <image src='{{item.src}}' catchtap='chooseBcg' data-index='{{index}}' data-src='{{item.src}}'></image>
+<!-- 易观风云 - 主页 -->
+<view class="page {{isIPhoneX ? 'iphonex-padding' : ''}}">
+
+  <!-- 背景 -->
+  <view class="page-bg" style="{{bgStyle}}"></view>
+  <image wx:if="{{bcgImg}}" class="page-bg-img" src="{{bcgImg}}" mode="aspectFill"></image>
+
+  <!-- 骨架屏 -->
+  <skeleton wx:if="{{loading}}"></skeleton>
+
+  <!-- 正式内容 -->
+  <block wx:if="{{!loading}}">
+
+    <!-- 自定义导航栏 -->
+    <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+      <view class="nav-content">
+        <!-- 搜索框 -->
+        <view class="search-box">
+          <image class="search-icon" src="/images/search.png"></image>
+          <input
+            class="search-input"
+            placeholder="搜索城市"
+            placeholder-class="search-placeholder"
+            confirm-type="search"
+            value="{{searchText}}"
+            bindconfirm="onSearchConfirm"
+            bindfocus="onSearchFocus"
+            bindblur="onSearchBlur"
+          />
         </view>
       </view>
     </view>
-    <view class='close' catchtap='hideBcgImgArea'>
-      <image src='/images/up-arrow.png'></image>
-    </view>
-  </view>
-  <view class='content' wx:if='{{!bcgImgAreaShow}}' style='margin-top: {{setting.hiddenSearch ? 20 : 60}}px'>
-    <view class='avatarInfo' catchtap='showBcgImgArea'>
-      <open-data class='avatar' type='userAvatarUrl'></open-data>
-      <open-data class='name' type='userNickName'></open-data>
-      <image class='downArrow' src='/images/down-arrow.png'></image>
-    </view>
-    <view class='info'>
-      <view class='city'>
-        <view class='name'>{{cityDatas.originalData.results[0].currentCity || '定位中'}}</view>
-        <text class='time' wx:if='{{cityDatas.updateTimeFormat}}'>{{cityDatas.updateTimeFormat}} 更新</text>
+
+    <scroll-view
+      scroll-y
+      class="main-scroll"
+      enable-back-to-top
+      refresher-enabled
+      refresher-triggered="{{refreshing}}"
+      bindrefresherrefresh="onPullDownRefresh"
+    >
+      <!-- 头部：城市 + 温度 -->
+      <view class="header fade-in-up">
+        <view class="header-info" catchtap="showBcgImgArea">
+          <view class="city-name">{{cityName}}</view>
+          <view class="update-time" wx:if="{{updateTime}}">{{updateTime}} 更新</view>
+        </view>
+        <view class="greeting">{{greeting}}</view>
+        <view class="current-temp">
+          <text class="temp-num">{{currentTemp}}</text>
+          <text class="temp-unit">°C</text>
+        </view>
+        <view class="current-weather">
+          <text class="weather-icon">{{currentIcon}}</text>
+          <text class="weather-text">{{currentWeather}}</text>
+        </view>
+        <view class="pm-badge" wx:if="{{pm.val}}">
+          <view class="pm-dot" style="background: {{pm.color}}"></view>
+          <text>{{pm.desc}} {{pm.val}}</text>
+        </view>
       </view>
-      <view class='message'>{{message}}</view>
-      <view wx:if='{{cityDatas.temperature}}' class='temp num' decode='true'>{{cityDatas.temperature}}<text style='font-size:90rpx'>°</text></view>
-      <view class='weather'>{{cityDatas.originalData.results[0].weather_data[0].weather || '--'}}</view>
-      <view class='pm' wx:if='{{cityDatas.pm.val}}'>
-        <text>{{cityDatas.pm.desc}} {{cityDatas.pm.val}}</text>
+
+      <!-- 24小时预报 -->
+      <view class="section fade-in-up" style="animation-delay: 0.1s">
+        <hourly-forecast hourly-data="{{hourlyData}}"></hourly-forecast>
       </view>
-    </view>
-    <!-- <canvas canvas-id='line' style='width:100%;height:350rpx;'></canvas> -->
-    <view class='guide' wx:if='{{cityDatas.originalData.results[0].weather_data}}'>
-      <view class='item' wx:for='{{cityDatas.originalData.results[0].weather_data}}' wx:key='{{index}}'>
-        <view class='date i'>{{index === 0 ? '今天' : item.date}}</view>
-        <view class='temperature i'>{{item.temperature}}</view>
-        <!-- <image class='i' src='{{item.dayPictureUrl}}' mode='widthFix'></image> -->
-        <!-- <image class='i' src='{{item.nightPictureUrl}}' mode='widthFix'></image> -->
-        <view class='weather i'>{{item.weather}}</view>
-        <view class='wind i'>{{item.wind}}</view>
+
+      <!-- 多天预报 -->
+      <view class="section fade-in-up" style="animation-delay: 0.15s">
+        <weather-forecast weather-data="{{weatherData}}"></weather-forecast>
       </view>
-    </view>
-    <view class='livingIndex' wx:if='{{cityDatas.originalData.results[0].index && !setting.hiddenIndex}}'>
-      <view class='item' wx:for='{{cityDatas.originalData.results[0].index}}' wx:key='{{index}}'>
-        <image class='icon' src='{{icons[index]}}'></image>
-        <view class='right'>
-          <view class='key'>{{item.tipt}} {{item.zs}}</view>
-          <view class='value'>{{item.des}}</view>
+
+      <!-- 空气质量 -->
+      <view class="section fade-in-up" style="animation-delay: 0.2s">
+        <aqi-card aqi="{{pm}}" pm25="{{pm.val}}"></aqi-card>
+      </view>
+
+      <!-- 天气详情 -->
+      <view class="section fade-in-up" style="animation-delay: 0.25s">
+        <sunrise-sunset weather-detail="{
+          wind: windDir,
+          temperature: currentTemp,
+          weather: currentWeather
+        }"></sunrise-sunset>
+      </view>
+
+      <!-- 生活指数 -->
+      <view class="section fade-in-up" style="animation-delay: 0.3s" wx:if="{{indexData.length > 0}}">
+        <lifestyle-indices index-data="{{indexData}}"></lifestyle-indices>
+      </view>
+
+      <!-- 底部 -->
+      <view class="footer">
+        <text>易观风云 · 让天气更有温度</text>
+      </view>
+    </scroll-view>
+
+    <!-- 背景选择面板 -->
+    <view class="bcg-panel" wx:if="{{bcgImgAreaShow}}">
+      <view class="bcg-overlay" catchtap="hideBcgImgArea"></view>
+      <view class="bcg-content">
+        <view class="bcg-title">选择背景</view>
+        <view class="bcg-list">
+          <view
+            class="bcg-item {{bcgImgIndex === index ? 'active' : ''}}"
+            wx:for="{{bcgImgList}}"
+            wx:key="index"
+            catchtap="chooseBcg"
+            data-index="{{index}}"
+            data-src="{{item.src}}"
+          >
+            <image src="{{item.src}}"></image>
+          </view>
+          <view class="bcg-item {{!bcgImg ? 'active' : ''}}" catchtap="chooseBcg" data-index="-1" data-src="">
+            <view class="bcg-gradient" style="{{bgStyle}}"></view>
+            <text class="bcg-label">渐变</text>
+          </view>
+        </view>
+        <view class="bcg-close" catchtap="hideBcgImgArea">
+          <text>收起</text>
         </view>
       </view>
     </view>
-    <view class='footer'>开发者 · QIGE</view>
-  </view>
-  <view wx:if='{{openSettingButtonShow}}' class='openSettingButton'>
-    <image src='/images/unlock.png'></image>
-    <button open-type='openSetting'></button>
-  </view>
-  <!-- 悬浮菜单 -->
-  <view class='menus' wx:if='{{!bcgImgAreaShow}}'>
-    <!-- 城市选择页 -->
-    <image src="/images/location.png" animation="{{animationOne}}" class="menu" bindtap="menuOne" 
-     style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
-     <!-- 设置页 -->
-    <image src="/images/setting.png" animation="{{animationTwo}}" class="menu" bindtap="menuTwo"  
-    style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
-    <!-- 关于页 -->
-    <image src="/images/info.png" animation="{{animationThree}}" class="menu" bindtap="menuThree" 
-     style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
-     <!-- 切换 -->
-    <image src="/images/menu.png" animation="{{animationMain}}" class="menu main" bindtap="menuMain" 
-    catchtouchmove='menuMainMove' style='top:{{pos.top}}px;left:{{pos.left}}px;'></image>
-  </view>
+
+    <!-- 悬浮菜单 -->
+    <view class="fab-menu" wx:if="{{!bcgImgAreaShow}}">
+      <image src="/images/location.png" animation="{{animationOne}}" class="fab-item"
+        bindtap="menuOne" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
+      <image src="/images/setting.png" animation="{{animationTwo}}" class="fab-item"
+        bindtap="menuTwo" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
+      <image src="/images/info.png" animation="{{animationThree}}" class="fab-item"
+        bindtap="menuThree" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
+      <image src="/images/menu.png" animation="{{animationMain}}" class="fab-item fab-main"
+        bindtap="menuMain" catchtouchmove="menuMainMove"
+        style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
+    </view>
+
+  </block>
 </view>

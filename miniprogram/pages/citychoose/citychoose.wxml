@@ -1,26 +1,60 @@
-<!--城市选择页面-->
-<view class="container">
+<!-- 城市选择 -->
+<view class="page">
   <view class="wrapper">
-    <!-- 城市搜索框 -->
-    <view class="search">
-      <view class="inner">
-        <image class="icon" src="/images/search_grey.png"></image>
-        <input value="{{inputText}}" placeholder="搜索城市" maxlength="20" confirm-type="搜索" bindinput="inputFilter" bindconfirm="inputFilter" bindfocus="inputFilter"></input>
+    <!-- 搜索 -->
+    <view class="search-bar">
+      <view class="search-inner">
+        <image class="search-icon" src="/images/search_grey.png"></image>
+        <input
+          value="{{inputText}}"
+          placeholder="搜索城市"
+          placeholder-class="ph"
+          maxlength="20"
+          confirm-type="search"
+          bindinput="inputFilter"
+          bindconfirm="inputFilter"
+        />
       </view>
-      <text class="cancel" catchtap="cancel">清空</text>
+      <text class="cancel-btn" catchtap="cancel">清空</text>
     </view>
-  </view>
-  <!-- 热门城市 -->
-  <!-- <view class="top" wx:if="{{hotCities.length}}">
-    <view class="title">热门城市</view>
-    <view class="items">
-      <view class="item" hover-class="hover-ddd" catchtap="choose" data-item="{{item}}" wx:key="{{index}}" wx:for="{{hotCities}}">{{item.name}}</view>
-    </view>
-  </view> -->
-  <!-- 底部 -->
-  <view class="bottom">
-    <view wx:key=""></view>
-  </view>
-  <view class="empty" wx:if='{{!showItems}}'>暂无城市可选</view>
-</view>
 
+    <!-- 热门城市 -->
+    <view class="hot-section">
+      <view class="section-title">热门城市</view>
+      <view class="hot-list">
+        <view
+          class="hot-item"
+          wx:for="{{hotCities}}"
+          wx:key="index"
+          catchtap="choose"
+          data-item="{{item}}"
+          hover-class="hot-item-active"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 城市列表 -->
+    <view class="city-list">
+      <block wx:for="{{showItems}}" wx:key="letter" wx:for-index="letter">
+        <view class="letter-header">{{letter}}</view>
+        <view
+          class="city-item"
+          wx:for="{{item}}"
+          wx:key="name"
+          catchtap="choose"
+          data-item="{{item}}"
+          hover-class="city-item-active"
+        >
+          {{item.name}}
+        </view>
+      </block>
+    </view>
+
+    <view class="empty" wx:if="{{!showItems}}">
+      <text>😔</text>
+      <text class="empty-text">未找到匹配城市</text>
+    </view>
+  </view>
+</view>

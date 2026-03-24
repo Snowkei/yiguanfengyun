@@ -1,152 +1,85 @@
-// pages/citychoose/citychoose.js
-let staticData=require('../../data/staticData.js')
-let utils=require('../../utils/utils.js')
+let staticData = require('../../data/staticData.js')
+let { isEmptyObject } = require('../../utils/weather')
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-    alternative:null,
-    cities:[],
-    // 需要显示的城市
-    showItems:null,
-    inputText:''
-  },
-  cancel() {
-    this.setData({
-      inputText: '',
-      showItems: this.data.cities,
-    })
-  },
-  inputFilter(e) {
-    let alternative = {}
-    let cities = this.data.cities
-    let value = e.detail.value.replace(/\s+/g, '')
-    if (value.length) {
-      for (let i in cities) {
-        let items = cities[i]
-        for (let j = 0, len = items.length; j < len; j++) {
-          let item = items[j]
-          if (item.name.indexOf(value) !== -1) {
-            if (utils.isEmptyObject(alternative[i])) {
-              alternative[i] = []
-            }
-            alternative[i].push(item)
-          }
-        }
-      }
-      if (utils.isEmptyObject(alternative)) {
-        alternative = null
-      }
-      this.setData({
-        alternative,
-        showItems: alternative,
-      })
-    } else {
-      this.setData({
-        alternative: null,
-        showItems: cities,
-      })
-    }
-  },
-  // 按照字母顺序生成需要的数据格式
-  getSortedAreaObj(areas) {
-    // let areas = staticData.areas
-    areas = areas.sort((a, b) => {
-      if (a.letter > b.letter) {
-        return 1
-      }
-      if (a.letter < b.letter) {
-        return -1
-      }
-      return 0
-    })
-    let obj = {}
-    for (let i = 0, len = areas.length; i < len; i++) {
-      let item = areas[i]
-      delete item.districts
-      let letter = item.letter
-      if (!obj[letter]) {
-        obj[letter] = []
-      }
-      obj[letter].push(item)
-    }
-    // 返回一个对象，直接用 wx:for 来遍历对象，index 为 key，item 为 value，item 是一个数组
-    return obj
-  },
-  choose(e) {
-    let item = e.currentTarget.dataset.item
-    let name = item.name
-    let pages = getCurrentPages()
-    let len = pages.length
-    let indexPage = pages[len - 2]
-    indexPage.setData({
-      // 是否切换了城市
-      cityChanged: true,
-      // 需要查询的城市
-      searchCity: name,
-    })
-    wx.navigateBack({})
+    cities: [],
+    showItems: null,
+    inputText: '',
+    hotCities: [
+      { name: '北京' },
+      { name: '上海' },
+      { name: '广州' },
+      { name: '深圳' },
+      { name: '杭州' },
+      { name: '成都' },
+      { name: '武汉' },
+      { name: '南京' },
+    ],
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad () {
-    let cities = this.getSortedAreaObj(staticData.cities || [])
+  onLoad() {
+    let cities = this._getSortedAreaObj(staticData.cities || [])
     this.setData({
       cities,
       showItems: cities,
     })
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
+  inputFilter(e) {
+    let value = (e.detail.value || '').replace(/\s+/g, '')
+    if (!value) {
+      this.setData({ showItems: this.data.cities })
+      return
+    }
+    let cities = this.data.cities
+    let filtered = {}
+    for (let letter in cities) {
+      let items = cities[letter]
+      let matched = items.filter(item => item.name.indexOf(value) !== -1)
+      if (matched.length > 0) {
+        filtered[letter] = matched
+      }
+    }
+    this.setData({
+      showItems: isEmptyObject(filtered) ? null : filtered,
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
+  cancel() {
+    this.setData({
+      inputText: '',
+      showItems: this.data.cities,
+    })
   },
 
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
+  choose(e) {
+    let item = e.currentTarget.dataset.item
+    let name = item.name.replace(/市$/, '')
+    let pages = getCurrentPages()
+    let prevPage = pages[pages.length - 2]
 
+    // 设置上一页的标记
+    if (prevPage) {
+      prevPage.setData({
+        _cityChanged: true,
+        _selectedCity: name,
+      })
+    }
+    wx.navigateBack()
   },
 
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
+  _getSortedAreaObj(areas) {
+    areas.sort((a, b) => a.letter.localeCompare(b.letter))
+    let obj = {}
+    for (let i = 0; i < areas.length; i++) {
+      let item = areas[i]
+      let letter = item.letter
+      if (!obj[letter]) {
+        obj[letter] = []
+      }
+      obj[letter].push(item)
+    }
+    return obj
   },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
-  }
 })

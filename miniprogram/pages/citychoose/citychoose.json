@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "选择城市"
+  "navigationBarTitleText": "选择城市",
+  "navigationBarBackgroundColor": "#f0f4f8",
+  "navigationBarTextStyle": "black",
+  "usingComponents": {}
 }

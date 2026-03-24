@@ -1,21 +1,67 @@
-# 云开发 quickstart
+# 易观风云 v2.0
 
-这是云开发的快速启动指引，其中演示了如何上手使用云开发的三大基础能力：
+> 好看又好用的微信天气小程序
 
-- 数据库：一个既可在小程序前端操作，也能在云函数中读写的 JSON 文档型数据库
-- 文件存储：在小程序前端直接上传/下载云端文件，在云开发控制台可视化管理
-- 云函数：在云端运行的代码，微信私有协议天然鉴权，开发者只需编写业务逻辑代码
+## ✨ 功能特性
 
-## 数据来源
-  地理编码、天气数据均来自[百度地图开放平台](https://lbsyun.baidu.com/)。个人开发完全免费，有对应的小程序 `sdk`，加入即可，但是返回的天气数据较少。
+- 🌡️ **实时天气** — 自动定位，实时获取当前天气
+- 🕐 **24小时预报** — 逐时温度变化，一目了然
+- 📅 **多天预报** — 7天天气趋势，温度范围可视化
+- 🌬️ **空气质量** — AQI 指数 + 污染物详情
+- 💡 **生活指数** — 穿衣、运动、紫外线等智能建议
+- 🎨 **动态背景** — 根据天气自动切换渐变主题
+- 🏙️ **城市切换** — 全国城市快速搜索
+- 📱 **系统工具** — 屏幕亮度、NFC 检测等实用工具
 
-## 运行前
- > * [注册微信小程序](https://mp.weixin.qq.com/wxopen/waregister?action=step1)，获取 `appid`，配置域名白名单(在小程序后台将使用到的 `API` 添加到域名白名单)；
-> * 注册[百度地图开放平台](https://lbsyun.baidu.com/)开发者，创建应用 **（注意：应用类型选择微信小程序时，请填写真实的小程序 appid）** ，获取 `ak`（其他配置可自行查看）；
-> * 在 `app.js` 中替换 `globalData` 中的 `ak` 为自己的 `ak`；
-> * Run and Enjoy!
+## 🛠️ 技术架构
 
-## 参考文档
+```
+miniprogram/
+├── app.js / app.json / app.wxss    # 应用入口 & 全局样式
+├── components/                      # 组件化模块
+│   ├── hourly-forecast/             # 24小时预报组件
+│   ├── weather-forecast/            # 多天预报组件
+│   ├── aqi-card/                    # 空气质量卡片
+│   ├── lifestyle-indices/           # 生活指数组件
+│   ├── sunrise-sunset/              # 天气详情组件
+│   └── skeleton/                    # 骨架屏组件
+├── pages/
+│   ├── index/                       # 首页（天气主界面）
+│   ├── citychoose/                  # 城市选择
+│   ├── setting/                     # 设置
+│   ├── about/                       # 关于
+│   └── systeminfo/                  # 系统信息
+├── utils/
+│   ├── weather.js                   # 天气工具函数
+│   └── helpers.js                   # 缓存、请求、存储封装
+├── data/
+│   ├── staticData.js                # 城市数据
+│   └── messages.js                  # 问候语
+└── lib/
+    └── bmap-wx.js                   # 百度地图 SDK
+```
 
-- [云开发文档](https://developers.weixin.qq.com/miniprogram/dev/wxcloud/basis/getting-started.html)
+## 🎨 设计亮点
 
+- **毛玻璃效果** — `backdrop-filter` 实现磨砂玻璃卡片
+- **渐变背景** — 根据天气类型自动匹配渐变色
+- **骨架屏** — 数据加载前的优雅占位
+- **流畅动画** — fadeInUp、scaleIn 等微交互
+- **安全区适配** — 全面屏手机底部安全区
+
+## 📦 数据来源
+
+- 地理编码：[百度地图开放平台](https://lbsyun.baidu.com/)
+- 天气数据：百度地图天气 API
+
+## 🚀 快速开始
+
+1. 克隆本项目
+2. 使用微信开发者工具打开项目目录
+3. 在 `project.config.json` 中填入你的 AppID
+4. 在 `app.js` 中配置百度地图 AK
+5. 编译运行
+
+## 📄 License
+
+MIT

@@ -1,281 +1,163 @@
-let utils = require('../../utils/utils')
+const { storage, cmpVersion } = require('../../utils/weather')
+
 Page({
   data: {
     setting: {},
-    show: false,
     screenBrightness: '获取中',
     keepscreenon: false,
     SDKVersion: '',
     enableUpdate: true,
   },
-  switchChange(e) {
-    let dataset = e.currentTarget.dataset
-    let switchparam = dataset.switchparam
-    let setting = this.data.setting
-    if (switchparam === 'forceUpdate') {
-      if (this.data.enableUpdate) {
-        setting[switchparam] = (e.detail || {}).value
-      } else {
-        setting[switchparam] = false
-        wx.showToast({
-          title: '基础库版本较低，无法使用该功能',
-          icon: 'none',
-          duration: 2000,
-        })
-      }
-    } else if (switchparam === 'keepscreenon') {
-      this.setKeepScreenOn(!this.data.keepscreenon)
-      getApp().globalData.keepscreenon = !this.data.keepscreenon
-    } else {
-      setting[switchparam] = !(e.detail || {}).value
-    }
-    this.setData({
-      setting,
-    })
-    wx.setStorage({
-      key: 'setting',
-      data: setting,
-    })
-  },
-  // defaultBcg () {
-  //   this.removeBcg(() => {
-  //     wx.showToast({
-  //       title: '恢复默认背景',
-  //       duration: 1500,
-  //     })
-  //   })
-  // },
-  // removeBcg (callback) {
-  //   wx.getSavedFileList({
-  //     success: function (res) {
-  //       let fileList = res.fileList
-  //       let len = fileList.length
-  //       if (len > 0) {
-  //         for (let i = 0; i < len; i++)
-  //         (function (path) {
-  //           wx.removeSavedFile({
-  //             filePath: path,
-  //             complete: function (res) {
-  //               if (i === len - 1) {
-  //                 callback && callback()
-  //               }
-  //             }
-  //           })
-  //         })(fileList[i].filePath)
-  //       } else {
-  //         callback && callback()
-  //       }
-  //     },
-  //     fail: function () {
-  //       wx.showToast({
-  //         title: '出错了，请稍后再试',
-  //         icon: 'none',
-  //       })
-  //     },
-  //   })
-  // },
-  // customBcg () {
-  //   wx.chooseImage({
-  //     success: (res) => {
-  //       this.removeBcg(() => {
-  //         wx.saveFile({
-  //           tempFilePath: res.tempFilePaths[0],
-  //           success: function (res) {
-  //             wx.navigateBack({})
-  //           },
-  //         })
-  //       })
-  //     },
-  //     fail: function (res) {
-  //       let errMsg = res.errMsg
-  //       // 如果是取消操作，不提示
-  //       if (errMsg.indexOf('cancel') === -1) {
-  //         wx.showToast({
-  //           title: '发生错误，请稍后再试',
-  //           icon: 'none',
-  //         })
-  //       }
-  //     },
-  //   })
-  // },
-  hide() {
-    this.setData({
-      show: false,
-    })
-  },
-  updateInstruc() {
-    this.setData({
-      show: true,
-    })
-  },
+
   onShow() {
-    // 不能初始化到 data 里面！！！！
     this.setData({
-      keepscreenon: getApp().globalData.keepscreenon,
+      keepscreenon: getApp().globalData.keepscreenon || false,
     })
-    this.ifDisableUpdate()
-    this.getScreenBrightness()
-    wx.getStorage({
-      key: 'setting',
-      success: (res) => {
-        let setting = res.data
-        this.setData({
-          setting,
-        })
-      },
-      fail: (res) => {
-        this.setData({
-          setting: {},
-        })
-      },
-    })
+    this._checkUpdateSupport()
+    this._getScreenBrightness()
+    this._loadSetting()
   },
-  ifDisableUpdate() {
-    let systeminfo = getApp().globalData.systeminfo
-    let SDKVersion = systeminfo.SDKVersion
-    let version = utils.cmpVersion(SDKVersion, '1.9.90')
-    if (version >= 0) {
-      this.setData({
-        SDKVersion,
-        enableUpdate: true,
-      })
+
+  switchChange(e) {
+    let param = e.currentTarget.dataset.switchparam
+    let setting = { ...this.data.setting }
+    let val = (e.detail || {}).value
+
+    if (param === 'forceUpdate') {
+      if (!this.data.enableUpdate) {
+        setting[param] = false
+        wx.showToast({ title: '基础库版本过低', icon: 'none' })
+      } else {
+        setting[param] = val
+      }
+    } else if (param === 'keepscreenon') {
+      this._setKeepScreenOn(!this.data.keepscreenon)
+      getApp().globalData.keepscreenon = !this.data.keepscreenon
+      return
     } else {
-      this.setData({
-        SDKVersion,
-        enableUpdate: false,
-      })
+      // 反向：hiddenSearch 等（显示/隐藏）
+      setting[param] = !val
     }
+
+    this.setData({ setting })
+    storage.set('setting', setting)
   },
-  getHCEState() {
-    wx.showLoading({
-      title: '检测中...',
-    })
-    wx.getHCEState({
-      success: function (res) {
-        wx.hideLoading()
-        wx.showModal({
-          title: '检测结果',
-          content: '该设备支持NFC功能',
-          showCancel: false,
-          confirmText: '朕知道了',
-          confirmColor: '#40a7e7',
-        })
-      },
-      fail: function (res) {
-        wx.hideLoading()
-        wx.showModal({
-          title: '检测结果',
-          content: '该设备不支持NFC功能',
-          showCancel: false,
-          confirmText: '朕知道了',
-          confirmColor: '#40a7e7',
-        })
-      },
-    })
-  },
-  getScreenBrightness() {
+
+  // 屏幕亮度
+  _getScreenBrightness() {
     wx.getScreenBrightness({
       success: (res) => {
-        this.setData({
-          screenBrightness: Number(res.value * 100).toFixed(0),
-        })
+        this.setData({ screenBrightness: Math.round(res.value * 100) })
       },
-      fail: (res) => {
-        this.setData({
-          screenBrightness: '获取失败',
-        })
+      fail: () => {
+        this.setData({ screenBrightness: '获取失败' })
       },
     })
   },
-  screenBrightnessChanging(e) {
-    this.setScreenBrightness(e.detail.value)
-  },
-  setScreenBrightness(val) {
+
+  onBrightnessChange(e) {
+    const val = e.detail.value
     wx.setScreenBrightness({
       value: val / 100,
-      success: (res) => {
-        this.setData({
-          screenBrightness: val,
-        })
+      success: () => {
+        this.setData({ screenBrightness: val })
       },
     })
   },
-  setKeepScreenOn(b) {
+
+  _setKeepScreenOn(b) {
     wx.setKeepScreenOn({
       keepScreenOn: b,
       success: () => {
-        this.setData({
-          keepscreenon: b,
+        this.setData({ keepscreenon: b })
+      },
+    })
+  },
+
+  // NFC 检测
+  checkNFC() {
+    wx.showLoading({ title: '检测中...' })
+    wx.getHCEState({
+      success() {
+        wx.hideLoading()
+        wx.showModal({
+          title: 'NFC 检测',
+          content: '✅ 该设备支持 NFC 功能',
+          showCancel: false,
+          confirmText: '好的',
+        })
+      },
+      fail() {
+        wx.hideLoading()
+        wx.showModal({
+          title: 'NFC 检测',
+          content: '❌ 该设备不支持 NFC 功能',
+          showCancel: false,
+          confirmText: '好的',
         })
       },
     })
   },
-  getsysteminfo() {
-    wx.navigateTo({
-      url: '/pages/systeminfo/systeminfo',
-    })
-  },
-  removeStorage(e) {
-    let that = this
-    let datatype = e.currentTarget.dataset.type
-    if (datatype === 'menu') {
-      wx.setStorage({
-        key: 'pos',
-        data: {
-          top: 'auto',
-          left: 'auto',
-        },
-        success: function (res) {
-          wx.showToast({
-            title: '悬浮球已复位',
-          })
-        },
-      })
-    } else if (datatype === 'setting') {
-      wx.showModal({
-        title: '提示',
-        content: '确认要初始化设置',
-        cancelText: '容朕想想',
-        confirmColor: '#40a7e7',
-        success: (res) => {
-          if (res.confirm) {
-            wx.removeStorage({
-              key: 'setting',
-              success: function (res) {
-                wx.showToast({
-                  title: '设置已初始化',
-                })
-                that.setData({
-                  setting: {},
-                })
-              },
-            })
-          }
-        },
-      })
-    } else if (datatype === 'all') {
-      wx.showModal({
-        title: '提示',
-        content: '确认要删除',
-        cancelText: '容朕想想',
-        confirmColor: '#40a7e7',
-        success(res) {
-          if (res.confirm) {
-            wx.clearStorage({
-              success: (res) => {
-                wx.showToast({
-                  title: '数据已清除',
-                })
-                that.setData({
-                  setting: {},
-                  pos: {},
-                })
-              },
-            })
-          }
-        },
-      })
-    }
+
+  // 系统信息
+  goSystemInfo() {
+    wx.navigateTo({ url: '/pages/systeminfo/systeminfo' })
   },
 
+  // 版本兼容性检查
+  _checkUpdateSupport() {
+    const sysInfo = getApp().globalData.systemInfo
+    const sdk = sysInfo.SDKVersion || ''
+    const version = cmpVersion(sdk, '1.9.90')
+    this.setData({
+      SDKVersion: sdk,
+      enableUpdate: version >= 0,
+    })
+  },
+
+  // 加载设置
+  _loadSetting() {
+    const setting = storage.get('setting', {})
+    this.setData({ setting })
+  },
+
+  // 悬浮球复位
+  resetMenu() {
+    storage.set('pos', { top: 'auto', left: 'auto' })
+    wx.showToast({ title: '悬浮球已复位' })
+  },
+
+  // 初始化设置
+  resetSetting() {
+    wx.showModal({
+      title: '确认',
+      content: '确定要恢复默认设置吗？',
+      confirmText: '确定',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          storage.remove('setting')
+          this.setData({ setting: {} })
+          wx.showToast({ title: '已恢复默认' })
+        }
+      },
+    })
+  },
+
+  // 清除所有数据
+  clearAll() {
+    wx.showModal({
+      title: '确认',
+      content: '确定要清除所有本地数据？此操作不可恢复。',
+      confirmText: '清除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          storage.clear()
+          this.setData({ setting: {}, pos: {} })
+          wx.showToast({ title: '已清除所有数据' })
+        }
+      },
+    })
+  },
 })

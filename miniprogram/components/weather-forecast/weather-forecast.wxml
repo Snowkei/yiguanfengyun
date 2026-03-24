@@ -1,0 +1,22 @@
+<!-- 天气预报（多天） -->
+<view class="glass-card">
+  <view class="card-title">
+    <text class="icon">📅</text>
+    <text>{{days}}天预报</text>
+  </view>
+  <view class="forecast-list">
+    <view class="forecast-item {{index === 0 ? 'today' : ''}}" wx:for="{{forecastData}}" wx:key="index">
+      <view class="day-name">{{item.weekDay}}</view>
+      <view class="weather-icon">{{item.icon}}</view>
+      <view class="weather-text">{{item.weather}}</view>
+      <view class="temp-range">
+        <view class="temp-bar">
+          <view class="temp-bar-fill" style="left: {{item.tempLeft}}%; width: {{item.tempWidth}}%; background: linear-gradient(90deg, {{item.tempColor}})"></view>
+          <view class="temp-dot temp-low">{{item.low}}°</view>
+          <view class="temp-dot temp-high">{{item.high}}°</view>
+        </view>
+      </view>
+      <view class="wind-info text-sm" style="color: #bbb">{{item.wind}}</view>
+    </view>
+  </view>
+</view>

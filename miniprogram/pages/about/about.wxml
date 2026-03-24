@@ -1,80 +1,91 @@
-<view class='about'>
-  <view class='content'>
-  <!-- 轮播 -->
-    <swiper indicator-color='#666666' indicator-active-color='#40a7e7' indicator-dots="true" autoplay="true" circular="true" interval="5000" duration="300" previous-margin="0px" next-margin="0px" style='height:{{swiperHeight}}'>
-      <block wx:for="{{bannerImgList}}" wx:key="{{index}}">
-        <swiper-item>
-          <view class='info' data-index='{{index}}' catchtap='previewImages'>
-            <image src='{{item.src}}'></image>
-            <view class='name'>{{item.title}}</view>
-          </view>
-        </swiper-item>
-      </block>
-    </swiper>
-    <view class='item'>
-      <view class='title'>代码已开源</view>
-      <view class='i' catchtap='copy' data-title='项目地址' data-content='{{projectAddress}}'>
-        <view class='icon'>
-          <image src='/images/github.png'></image>
+<!-- 关于页 -->
+<view class="about-page">
+  <view class="about-content">
+
+    <!-- 头部 -->
+    <view class="hero">
+      <view class="app-icon">🌤️</view>
+      <view class="app-name">易观风云</view>
+      <view class="app-desc">好看又好用的天气小程序</view>
+      <view class="app-version">v{{version}}</view>
+    </view>
+
+    <!-- 功能介绍 -->
+    <view class="about-group">
+      <view class="group-title">功能特性</view>
+      <view class="feature-list">
+        <view class="feature-item">
+          <text class="feature-icon">🌡️</text>
+          <text>实时天气与精准预报</text>
         </view>
-        <view class='text'>
-          <view>谢谢 star</view>
-          <view>{{projectAddress}}</view>
+        <view class="feature-item">
+          <text class="feature-icon">🕐</text>
+          <text>24小时逐时预报</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🌬️</text>
+          <text>空气质量指数监控</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">💡</text>
+          <text>智能生活指数建议</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">🎨</text>
+          <text>动态天气主题背景</text>
+        </view>
+        <view class="feature-item">
+          <text class="feature-icon">📍</text>
+          <text>全国城市天气查询</text>
         </view>
       </view>
     </view>
-    <view class='item'>
-      <view class='title'>联系开发者</view>
-      <view class='i' catchtap='copy' data-title='GitHub' data-content='{{github}}'>
-        <view class='icon'>
-          <image src='/images/github.png'></image>
+
+    <!-- 开源信息 -->
+    <view class="about-group">
+      <view class="group-title">开源与反馈</view>
+      <view class="link-item" catchtap="copy" data-content="{{projectAddress}}">
+        <text class="link-icon">📦</text>
+        <view class="link-info">
+          <text class="link-title">项目地址</text>
+          <text class="link-url">{{projectAddress}}</text>
         </view>
-        <view class='text'>
-          <view>通过 GitHub 反馈</view>
-          <view>{{github}}</view>
-        </view>
+        <text class="link-action">复制</text>
       </view>
-      <view class='i' catchtap='copy' data-title='邮箱' data-content='{{email}}'>
-        <view class='icon'>
-          <image src='/images/email.png'></image>
+      <view class="link-item" catchtap="copy" data-content="{{github}}">
+        <text class="link-icon">🐱</text>
+        <view class="link-info">
+          <text class="link-title">GitHub</text>
+          <text class="link-url">{{github}}</text>
         </view>
-        <view class='text'>
-          <view>通过 Email 反馈</view>
-          <view>{{email}}</view>
-        </view>
+        <text class="link-action">复制</text>
       </view>
-      <view class='i' catchtap='copy' data-title='QQ' data-content='{{qq}}'>
-        <view class='icon'>
-          <image src='/images/qq.png'></image>
+      <button class="share-btn" open-type="contact">
+        <text class="link-icon">💬</text>
+        <view class="link-info">
+          <text class="link-title">微信客服</text>
+          <text class="link-desc">问题反馈与建议</text>
         </view>
-        <view class='text'>
-          <view>通过 QQ 反馈</view>
-          <view>{{qq}}</view>
-        </view>
+        <text class="link-action">联系</text>
+      </button>
+    </view>
+
+    <!-- 鸣谢 -->
+    <view class="about-group">
+      <view class="group-title">鸣谢</view>
+      <view class="thanks-item">
+        <text>🗺️ 地理编码：百度地图开放平台</text>
       </view>
-      <view class='i'>
-        <view class='icon'>
-          <image src='/images/wechat.png'></image>
-        </view>
-        <view class='text'>微信快速联系</view>
-        <button open-type="contact" class='btn'></button>
+      <view class="thanks-item">
+        <text>🌤️ 天气数据：百度地图开放平台</text>
       </view>
     </view>
-    <view class='thanks item'>
-      <view class='title'>鸣谢</view>
-      <view class='i'>
-        <view class='icon'>
-          <image src='/images/location_grey.png'></image>
-        </view>
-        <view class='text'>地理编码：百度地图开放平台</view>
-      </view>
-      <view class='i'>
-        <view class='icon'>
-          <image src='/images/weather.png'></image>
-        </view>
-        <view class='text'>天气数据来源：百度地图开放平台</view>
-      </view>
+
+    <!-- 底部 -->
+    <view class="footer">
+      <text>易观风云 · v{{version}}</text>
+      <text class="footer-sub">用心感受每一天的天气</text>
     </view>
+
   </view>
-  <view class='footer'>开发者 · QiGe</view>
 </view>

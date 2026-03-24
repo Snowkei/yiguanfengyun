@@ -1,0 +1,30 @@
+<!-- 骨架屏组件 -->
+<view class="skeleton-container">
+  <!-- 头部区域 -->
+  <view class="skeleton-header">
+    <view class="skeleton skeleton-city"></view>
+    <view class="skeleton skeleton-temp"></view>
+    <view class="skeleton skeleton-desc"></view>
+  </view>
+  <!-- 卡片区域 -->
+  <view class="skeleton-card">
+    <view class="skeleton skeleton-title"></view>
+    <view class="skeleton-row">
+      <view class="skeleton skeleton-item"></view>
+      <view class="skeleton skeleton-item"></view>
+      <view class="skeleton skeleton-item"></view>
+      <view class="skeleton skeleton-item"></view>
+    </view>
+  </view>
+  <!-- 列表区域 -->
+  <view class="skeleton-card">
+    <view class="skeleton skeleton-title"></view>
+    <view class="skeleton-list">
+      <view class="skeleton skeleton-line"></view>
+      <view class="skeleton skeleton-line"></view>
+      <view class="skeleton skeleton-line"></view>
+      <view class="skeleton skeleton-line"></view>
+      <view class="skeleton skeleton-line"></view>
+    </view>
+  </view>
+</view>
