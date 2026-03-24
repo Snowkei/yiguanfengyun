@@ -2,36 +2,6 @@
  * 天气工具函数集合
  */
 
-// 天气图标映射（使用emoji作为轻量图标方案）
-const weatherIcons = {
-  '晴': '☀️',
-  '多云': '⛅',
-  '阴': '☁️',
-  '阵雨': '🌦️',
-  '雷阵雨': '⛈️',
-  '雷阵雨伴有冰雹': '⛈️',
-  '雨夹雪': '🌨️',
-  '小雨': '🌧️',
-  '中雨': '🌧️',
-  '大雨': '🌧️',
-  '暴雨': '🌧️',
-  '大暴雨': '🌧️',
-  '特大暴雨': '🌧️',
-  '阵雪': '🌨️',
-  '小雪': '❄️',
-  '中雪': '❄️',
-  '大雪': '❄️',
-  '暴雪': '❄️',
-  '雾': '🌫️',
-  '冻雨': '🌨️',
-  '沙尘暴': '🌪️',
-  '浮尘': '🌫️',
-  '扬沙': '🌫️',
-  '强沙尘暴': '🌪️',
-  '霾': '🌫️',
-  'default': '🌤️',
-}
-
 // 天气背景渐变映射
 const weatherGradients = {
   '晴': ['#4facfe', '#00f2fe'],
@@ -43,17 +13,6 @@ const weatherGradients = {
   '霾': ['#757F9A', '#D7DDE8'],
   '雷': ['#232526', '#414345'],
   'default': ['#667eea', '#764ba2'],
-}
-
-// 获取天气图标
-function getWeatherIcon(weather) {
-  if (!weather) return weatherIcons.default
-  for (let key in weatherIcons) {
-    if (weather.indexOf(key) !== -1) {
-      return weatherIcons[key]
-    }
-  }
-  return weatherIcons.default
 }
 
 // 获取天气背景渐变
@@ -96,25 +55,6 @@ function formatDate(date, fmt) {
     }
   }
   return fmt
-}
-
-// 获取星期几
-function getWeekDay(date) {
-  if (!(date instanceof Date)) {
-    date = new Date(date)
-  }
-  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-  const today = new Date()
-  const tomorrow = new Date(today)
-  tomorrow.setDate(today.getDate() + 1)
-
-  if (formatDate(date, 'yyyy-MM-dd') === formatDate(today, 'yyyy-MM-dd')) {
-    return '今天'
-  }
-  if (formatDate(date, 'yyyy-MM-dd') === formatDate(tomorrow, 'yyyy-MM-dd')) {
-    return '明天'
-  }
-  return days[date.getDay()]
 }
 
 // 解析温度范围字符串 "15°C ~ 25°C" → { min: 15, max: 25 }

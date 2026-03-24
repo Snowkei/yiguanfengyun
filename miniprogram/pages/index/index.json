@@ -2,11 +2,6 @@
   "navigationBarTitleText": "易观风云",
   "navigationStyle": "custom",
   "usingComponents": {
-    "skeleton": "/components/skeleton/skeleton",
-    "hourly-forecast": "/components/hourly-forecast/hourly-forecast",
-    "aqi-card": "/components/aqi-card/aqi-card",
-    "weather-forecast": "/components/weather-forecast/weather-forecast",
-    "lifestyle-indices": "/components/lifestyle-indices/lifestyle-indices",
-    "sunrise-sunset": "/components/sunrise-sunset/sunrise-sunset"
+    "skeleton": "/components/skeleton/skeleton"
   }
 }

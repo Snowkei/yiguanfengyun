@@ -1,9 +1,8 @@
-<!-- 易观风云 v2.0 -->
+<!-- 易观风云 v2.1 -->
 <view class="page {{isIPhoneX ? 'iphonex-padding' : ''}}">
 
   <!-- 背景 -->
   <view class="page-bg" style="{{bgStyle}}"></view>
-  <image wx:if="{{bcgImg}}" class="page-bg-img" src="{{bcgImg}}" mode="aspectFill"></image>
 
   <!-- 骨架屏 -->
   <skeleton wx:if="{{loading}}"></skeleton>
@@ -11,19 +10,71 @@
   <!-- 正式内容 -->
   <block wx:if="{{!loading}}">
 
-    <!-- 导航栏 -->
+    <!-- 顶部导航栏 -->
     <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
       <view class="nav-content">
-        <view class="search-box">
-          <image class="search-icon" src="/images/search.png"></image>
-          <input
-            class="search-input"
-            placeholder="搜索城市天气"
-            placeholder-class="search-placeholder"
-            confirm-type="search"
-            value="{{searchText}}"
-            bindconfirm="onSearchConfirm"
-          />
+        <!-- 城市标签栏 -->
+        <view class="city-tabs">
+          <view class="city-tab {{activeCityIndex === index ? 'active' : ''}}" 
+            wx:for="{{savedCities}}" wx:key="index"
+            catchtap="switchCity" data-index="{{index}}">
+            {{item.name}}
+          </view>
+          <view class="city-tab-add" catchtap="goCityChoose">
+            <text class="add-icon">+</text>
+          </view>
+        </view>
+        <!-- 搜索按钮 -->
+        <view class="nav-search-btn" catchtap="showSearchPanel">
+          <text class="nav-search-icon">🔍</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 搜索面板（覆盖层） -->
+    <view class="search-panel" wx:if="{{searchPanelShow}}">
+      <view class="search-panel-bg" catchtap="hideSearchPanel"></view>
+      <view class="search-panel-content" style="padding-top: {{statusBarHeight}}px">
+        <view class="search-panel-bar">
+          <view class="search-input-wrap">
+            <input class="search-panel-input" placeholder="搜索城市名称" 
+              placeholder-class="search-panel-placeholder"
+              confirm-type="search" focus="{{searchPanelShow}}"
+              value="{{searchText}}" bindconfirm="onSearchConfirm"
+              bindinput="onSearchInput" />
+          </view>
+          <text class="search-cancel" catchtap="hideSearchPanel">取消</text>
+        </view>
+        <!-- 搜索建议 -->
+        <view class="search-suggestions" wx:if="{{searchSuggestions.length > 0}}">
+          <view class="suggestion-item" wx:for="{{searchSuggestions}}" wx:key="name"
+            catchtap="onSuggestionTap" data-name="{{item.name}}">
+            <text class="suggestion-name">{{item.name}}</text>
+            <text class="suggestion-detail">{{item.admin1}} {{item.admin2}}</text>
+          </view>
+        </view>
+        <!-- 搜索历史 -->
+        <view class="search-history" wx:if="{{searchSuggestions.length === 0 && searchHistory.length > 0}}">
+          <view class="search-section-title">
+            <text>搜索历史</text>
+            <text class="clear-history" catchtap="clearSearchHistory">清除</text>
+          </view>
+          <view class="history-tags">
+            <view class="history-tag" wx:for="{{searchHistory}}" wx:key="*this"
+              catchtap="onSuggestionTap" data-name="{{item}}">
+              {{item}}
+            </view>
+          </view>
+        </view>
+        <!-- 热门城市 -->
+        <view class="search-hot" wx:if="{{searchSuggestions.length === 0}}">
+          <view class="search-section-title"><text>热门城市</text></view>
+          <view class="hot-cities">
+            <view class="hot-city" wx:for="{{hotCities}}" wx:key="*this"
+              catchtap="onSuggestionTap" data-name="{{item}}">
+              {{item}}
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -40,7 +91,7 @@
 
       <!-- ====== 头部：城市 + 温度 ====== -->
       <view class="header fade-in-up">
-        <view class="header-info" catchtap="showBcgImgArea">
+        <view class="header-info">
           <view class="city-name">{{cityName}}</view>
           <view class="update-time">{{updateTime}} 更新</view>
         </view>
@@ -180,7 +231,6 @@
               </view>
             </view>
           </view>
-          <!-- 污染物详情 -->
           <view class="pollutants-grid" wx:if="{{aqiDetail && aqiDetail.pollutants}}">
             <view class="pollutant-item" wx:for="{{aqiDetail.pollutants}}" wx:key="key">
               <view class="pollutant-name">{{item.key}}</view>
@@ -218,32 +268,9 @@
 
     </scroll-view>
 
-    <!-- 背景选择 -->
-    <view class="bcg-panel" wx:if="{{bcgImgAreaShow}}">
-      <view class="bcg-overlay" catchtap="hideBcgImgArea"></view>
-      <view class="bcg-content">
-        <view class="bcg-title">选择背景</view>
-        <view class="bcg-list">
-          <view class="bcg-item {{!bcgImg ? 'active' : ''}}" catchtap="chooseBcg" data-src="">
-            <view class="bcg-gradient" style="{{bgStyle}}"></view>
-            <text class="bcg-label">渐变</text>
-          </view>
-        </view>
-        <view class="bcg-close" catchtap="hideBcgImgArea"><text>收起</text></view>
-      </view>
-    </view>
-
-    <!-- 悬浮菜单 -->
-    <view class="fab-menu">
-      <image src="/images/location.png" animation="{{animationOne}}" class="fab-item"
-        bindtap="menuOne" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
-      <image src="/images/setting.png" animation="{{animationTwo}}" class="fab-item"
-        bindtap="menuTwo" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
-      <image src="/images/info.png" animation="{{animationThree}}" class="fab-item"
-        bindtap="menuThree" style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
-      <image src="/images/menu.png" animation="{{animationMain}}" class="fab-item fab-main"
-        bindtap="menuMain" catchtouchmove="menuMainMove"
-        style="top:{{pos.top}}px;left:{{pos.left}}px;"></image>
+    <!-- 右下角悬浮按钮 -->
+    <view class="fab" catchtap="goSetting">
+      <text class="fab-icon">⚙️</text>
     </view>
 
   </block>

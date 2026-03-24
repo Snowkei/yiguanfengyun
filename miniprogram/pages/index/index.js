@@ -1,5 +1,6 @@
 /**
- * 易观风云 - 主页面
+ * 易观风云 v2.1 - 主页面
+ * 支持多城市切换、搜索面板、WAQI 真实 AQI、生活指数
  */
 const api = require('../../utils/api.js')
 const weather = require('../../utils/weather.js')
@@ -8,12 +9,19 @@ const { getWeatherGradient, formatDate, calcPM, getGreeting } = weather
 
 const app = getApp()
 
+// 默认保存的城市
+const DEFAULT_CITIES = [{ name: '定位中...', lat: null, lon: null, isLocation: true }]
+
 Page({
   data: {
     loading: true,
     refreshing: false,
     statusBarHeight: 0,
     isIPhoneX: false,
+
+    // 多城市
+    savedCities: DEFAULT_CITIES,
+    activeCityIndex: 0,
 
     // 天气
     cityName: '定位中...',
@@ -39,108 +47,117 @@ Page({
     hourlyData: [],
     dailyData: [],
 
-    // 空气质量详情
+    // 空气质量 & 生活指数
     aqiDetail: null,
-
-    // 生活指数
     lifeIndices: [],
 
     // 背景
     bgStyle: '',
     gradientColors: ['#667eea', '#764ba2'],
 
-    // 搜索
+    // 搜索面板
+    searchPanelShow: false,
     searchText: '',
-
-    // 背景图选择
-    bcgImgAreaShow: false,
-    bcgImg: '',
-
-    // 悬浮菜单
-    hasPopped: false,
-    pos: {},
-    animationMain: {},
-    animationOne: {},
-    animationTwo: {},
-    animationThree: {},
+    searchSuggestions: [],
+    searchHistory: [],
+    hotCities: ['北京', '上海', '广州', '深圳', '杭州', '成都', '武汉', '南京', '重庆', '西安', '长沙', '天津'],
   },
 
   onLoad() {
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight || 44,
       isIPhoneX: app.globalData.isIPhoneX,
+      searchHistory: storage.get('searchHistory', []),
+      savedCities: storage.get('savedCities', null) || DEFAULT_CITIES,
     })
-    this.loadWeather()
+    this.loadWeatherForCity(0)
   },
 
   onShow() {
     this.setData({ greeting: getGreeting() })
+  },
 
-    // 检查城市切换
-    const pages = getCurrentPages()
-    const cur = pages[pages.length - 1]
-    if (cur && cur.data._cityChanged) {
-      const city = cur.data._selectedCity
-      cur.setData({ _cityChanged: false, _selectedCity: '' })
-      if (city) this.searchCity(city)
+  // ========== 多城市 ==========
+  switchCity(e) {
+    const idx = e.currentTarget.dataset.index
+    if (idx === this.data.activeCityIndex) return
+    this.setData({ activeCityIndex: idx })
+    this.loadWeatherForCity(idx)
+  },
+
+  addCity(cityInfo) {
+    // 检查是否已存在
+    const exists = this.data.savedCities.some(c => c.name === cityInfo.name)
+    if (exists) {
+      const idx = this.data.savedCities.findIndex(c => c.name === cityInfo.name)
+      this.setData({ activeCityIndex: idx })
+      this.loadWeatherForCity(idx)
+      return
     }
+    const cities = [...this.data.savedCities, cityInfo]
+    this.setData({ savedCities: cities })
+    storage.set('savedCities', cities)
+    // 切换到新城市
+    const idx = cities.length - 1
+    this.setData({ activeCityIndex: idx })
+    this.loadWeatherForCity(idx)
+  },
 
-    this._loadMenuPos()
+  goCityChoose() {
+    wx.navigateTo({ url: '/pages/citychoose/citychoose' })
+  },
+
+  goSetting() {
+    wx.navigateTo({ url: '/pages/setting/setting' })
   },
 
   // ========== 加载天气 ==========
-  loadWeather() {
+  loadWeatherForCity(idx) {
+    const city = this.data.savedCities[idx]
+    if (!city) return
     this.setData({ loading: true })
 
-    api.fetchWeatherByLocation()
-      .then(data => {
-        this._applyWeatherData(data, '当前定位')
-        // 异步加载补充数据（不阻塞主流程）
-        if (data._lat && data._lon) {
-          this._loadExtraData(data._lat, data._lon, data)
-        } else if (data.cityInfo) {
-          this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
-        } else {
-          this._loadExtraData(39.9042, 116.4074, data)
-        }
-        this.setData({ loading: false, refreshing: false })
-        storage.set('weatherCache', { data, time: Date.now() })
-      })
-      .catch(err => {
-        console.error('加载天气失败:', err)
-        this.setData({ loading: false, refreshing: false })
-        showError('天气加载失败，请检查网络')
-      })
+    if (city.isLocation || !city.lat) {
+      // 定位城市
+      api.fetchWeatherByLocation()
+        .then(data => {
+          const name = data.cityInfo ? data.cityInfo.name : '当前定位'
+          this._applyWeatherData(data, name)
+          // 更新定位城市的坐标
+          if (data.cityInfo) {
+            const cities = [...this.data.savedCities]
+            cities[0] = { name, lat: data.cityInfo.latitude, lon: data.cityInfo.longitude, isLocation: true }
+            this.setData({ savedCities: cities })
+            storage.set('savedCities', cities)
+            this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
+          }
+          this.setData({ loading: false, refreshing: false })
+        })
+        .catch(err => {
+          console.error('加载天气失败:', err)
+          this.setData({ loading: false, refreshing: false })
+          showError('天气加载失败，请检查网络')
+        })
+    } else {
+      // 指定城市
+      api.fetchWeather(city.lat, city.lon)
+        .then(data => {
+          this._applyWeatherData(data, city.name)
+          this._loadExtraData(city.lat, city.lon, data)
+          this.setData({ loading: false, refreshing: false })
+        })
+        .catch(err => {
+          console.error('加载天气失败:', err)
+          this.setData({ loading: false, refreshing: false })
+          showError('天气加载失败')
+        })
+    }
   },
 
-  searchCity(cityName) {
-    if (!cityName || !cityName.trim()) return
-    this.setData({ loading: true })
-
-    api.fetchWeatherByCity(cityName.trim())
-      .then(data => {
-        const name = data.cityInfo ? data.cityInfo.name : cityName
-        this._applyWeatherData(data, name)
-        // 异步加载补充数据
-        if (data.cityInfo) {
-          this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
-        }
-        this.setData({ loading: false })
-        storage.set('weatherCache', { data, time: Date.now() })
-      })
-      .catch(err => {
-        console.error('搜索城市失败:', err)
-        this.setData({ loading: false })
-        showError(err.message || '未找到该城市')
-      })
-  },
-
-  // ========== 加载补充数据（WAQI + 生活指数）==========
+  // ========== 补充数据 ==========
   _loadExtraData(lat, lon, weatherData) {
-    // 并行请求 WAQI 和生活指数
     api.fetchAQI(lat, lon).then(aqiData => {
       if (aqiData && aqiData.pm25 !== null) {
-        // 有真实 PM2.5 数据
         const pmVal = Math.round(aqiData.pm25)
         const pm = calcPM(pmVal)
         this.setData({
@@ -158,75 +175,44 @@ Page({
           },
         })
       }
-      // 如果 WAQI 失败，保持估算值（已在 _applyWeatherData 中设置）
     }).catch(() => {})
 
-    // 生活指数：先尝试和风天气 API，失败则用本地生成
     api.fetchLifeIndices(lat, lon).then(indices => {
       if (indices && indices.length > 0) {
         this.setData({ lifeIndices: this._formatIndices(indices) })
       } else {
-        // 降级：本地生成
-        const generated = api.generateLifeIndices(weatherData)
-        this.setData({ lifeIndices: this._formatIndices(generated) })
+        this.setData({ lifeIndices: this._formatIndices(api.generateLifeIndices(weatherData)) })
       }
     }).catch(() => {
-      // 降级：本地生成
-      const generated = api.generateLifeIndices(weatherData)
-      this.setData({ lifeIndices: this._formatIndices(generated) })
+      this.setData({ lifeIndices: this._formatIndices(api.generateLifeIndices(weatherData)) })
     })
   },
 
-  // 格式化生活指数用于展示
   _formatIndices(indices) {
     if (!indices || indices.length === 0) return []
-    const iconMap = {
-      1: '👔',  // 穿衣
-      3: '💊',  // 感冒
-      4: '🏃',  // 运动
-      5: '☀️',  // 紫外线
-      6: '🚗',  // 洗车
-      7: '🏖️', // 旅游
-      9: '🧴',  // 防晒
-      10: '😊', // 舒适度
-      13: '🤧', // 过敏
-      14: '👕', // 晾晒
-    }
-    return indices.map(item => ({
-      ...item,
-      icon: iconMap[item.type] || '📋',
-    }))
+    const icons = { 1: '👔', 3: '💊', 4: '🏃', 5: '☀️', 6: '🚗', 7: '🏖️', 9: '🧴', 10: '😊', 13: '🤧', 14: '👕' }
+    return indices.map(item => ({ ...item, icon: icons[item.type] || '📋' }))
   },
 
-  // 应用天气数据到页面
   _applyWeatherData(data, cityName) {
     const cur = data.current
     const today = data.daily[0] || {}
     const gradient = getWeatherGradient(cur.weather)
-
-    // PM2.5 估算（降级值，WAQI 真实数据会覆盖）
     const pmVal = this._estimatePM(cur)
     const pm = calcPM(pmVal)
 
-    // 计算温度范围条
     const allTemps = []
     data.daily.forEach(d => { allTemps.push(d.low, d.high) })
     const gMin = Math.min(...allTemps)
     const gMax = Math.max(...allTemps)
     const range = gMax - gMin || 1
 
-    const dailyData = data.daily.map(d => {
-      return {
-        ...d,
-        tempLeft: ((d.low - gMin) / range) * 60 + 5,
-        tempWidth: ((d.high - d.low) / range) * 60 + 10,
-        tempColor: this._getTempColor(d.low, d.high),
-      }
-    })
-
-    // 保存坐标供后续补充数据请求使用
-    data._lat = data.cityInfo ? data.cityInfo.latitude : 39.9042
-    data._lon = data.cityInfo ? data.cityInfo.longitude : 116.4074
+    const dailyData = data.daily.map(d => ({
+      ...d,
+      tempLeft: ((d.low - gMin) / range) * 60 + 5,
+      tempWidth: ((d.high - d.low) / range) * 60 + 10,
+      tempColor: this._getTempColor(d.low, d.high),
+    }))
 
     this.setData({
       cityName: cityName || '当前位置',
@@ -248,7 +234,6 @@ Page({
       sunset: today.sunset || '--:--',
       precipProb: today.precipProb !== undefined ? String(today.precipProb) : '--',
       updateTime: formatDate(new Date(), 'MM-dd hh:mm'),
-      // 清空旧的补充数据
       aqiDetail: null,
       lifeIndices: [],
     })
@@ -277,99 +262,71 @@ Page({
     return '#ffa726, #ef5350'
   },
 
-  // ========== 搜索 ==========
-  onSearchConfirm(e) {
-    const val = (e.detail.value || '').replace(/\s+/g, '')
-    if (!val) return
+  // ========== 搜索面板 ==========
+  showSearchPanel() {
+    this.setData({ searchPanelShow: true, searchText: '', searchSuggestions: [] })
+  },
 
-    // 彩蛋
-    if (val === '520' || val === '521') {
-      this.setData({ searchText: '' })
+  hideSearchPanel() {
+    this.setData({ searchPanelShow: false, searchText: '', searchSuggestions: [] })
+  },
+
+  onSearchInput(e) {
+    const val = (e.detail.value || '').trim()
+    if (!val) {
+      this.setData({ searchSuggestions: [] })
       return
     }
+    // 实时搜索建议
+    api.geocode(val).then(loc => {
+      this.setData({
+        searchSuggestions: [{ name: loc.name, admin1: loc.admin1, admin2: loc.admin2, lat: loc.latitude, lon: loc.longitude }],
+      })
+    }).catch(() => {
+      this.setData({ searchSuggestions: [] })
+    })
+  },
 
-    this.searchCity(val)
-    this.setData({ searchText: '' })
+  onSearchConfirm(e) {
+    const val = (e.detail.value || '').trim()
+    if (!val) return
+    this._searchAndAddCity(val)
+  },
+
+  onSuggestionTap(e) {
+    const name = e.currentTarget.dataset.name
+    if (!name) return
+    this._searchAndAddCity(name)
+  },
+
+  _searchAndAddCity(cityName) {
+    api.fetchWeatherByCity(cityName).then(data => {
+      const name = data.cityInfo ? data.cityInfo.name : cityName
+      const lat = data.cityInfo ? data.cityInfo.latitude : null
+      const lon = data.cityInfo ? data.cityInfo.longitude : null
+
+      // 加到搜索历史
+      const history = [name, ...this.data.searchHistory.filter(h => h !== name)].slice(0, 10)
+      this.setData({ searchHistory: history })
+      storage.set('searchHistory', history)
+
+      // 添加城市并切换
+      this.hideSearchPanel()
+      this.addCity({ name, lat, lon })
+    }).catch(err => {
+      showError(err.message || '未找到该城市')
+    })
+  },
+
+  clearSearchHistory() {
+    this.setData({ searchHistory: [] })
+    storage.remove('searchHistory')
   },
 
   // ========== 下拉刷新 ==========
   onPullDownRefresh() {
     this.setData({ refreshing: true })
-    this.loadWeather()
-  },
-
-  // ========== 背景 ==========
-  showBcgImgArea() {
-    this.setData({ bcgImgAreaShow: true })
-  },
-  hideBcgImgArea() {
-    this.setData({ bcgImgAreaShow: false })
-  },
-  chooseBcg(e) {
-    const { src } = e.currentTarget.dataset
-    this.setData({
-      bcgImg: src || '',
-      bcgImgAreaShow: false,
-    })
-  },
-
-  // ========== 悬浮菜单 ==========
-  menuMain() {
-    if (!this.data.hasPopped) {
-      this._popp()
-      this.setData({ hasPopped: true })
-    } else {
-      this._takeback()
-      this.setData({ hasPopped: false })
-    }
-  },
-  menuOne() { this.menuMain(); wx.navigateTo({ url: '/pages/citychoose/citychoose' }) },
-  menuTwo() { this.menuMain(); wx.navigateTo({ url: '/pages/setting/setting' }) },
-  menuThree() { this.menuMain(); wx.navigateTo({ url: '/pages/about/about' }) },
-
-  _popp() {
-    const a = () => wx.createAnimation({ duration: 200, timingFunction: 'ease-out' })
-    let m = a(), o1 = a(), o2 = a(), o3 = a()
-    m.rotateZ(180).step()
-    o1.translate(-50, -60).rotateZ(360).opacity(1).step()
-    o2.translate(-90, 0).rotateZ(360).opacity(1).step()
-    o3.translate(-50, 60).rotateZ(360).opacity(1).step()
-    this.setData({
-      animationMain: m.export(),
-      animationOne: o1.export(),
-      animationTwo: o2.export(),
-      animationThree: o3.export(),
-    })
-  },
-  _takeback() {
-    const a = () => wx.createAnimation({ duration: 200, timingFunction: 'ease-out' })
-    let m = a(), o1 = a(), o2 = a(), o3 = a()
-    m.rotateZ(0).step()
-    o1.translate(0, 0).rotateZ(0).opacity(0).step()
-    o2.translate(0, 0).rotateZ(0).opacity(0).step()
-    o3.translate(0, 0).rotateZ(0).opacity(0).step()
-    this.setData({
-      animationMain: m.export(),
-      animationOne: o1.export(),
-      animationTwo: o2.export(),
-      animationThree: o3.export(),
-    })
-  },
-
-  menuMainMove(e) {
-    if (this.data.hasPopped) { this._takeback(); this.setData({ hasPopped: false }) }
-    const sys = app.globalData.systemInfo
-    const x = Math.min(sys.windowWidth - 40, Math.max(90, e.touches[0].clientX))
-    const y = Math.min(sys.windowHeight - 100, Math.max(60, e.touches[0].clientY))
-    this.setData({ pos: { left: x, top: y } })
-  },
-
-  _loadMenuPos() {
-    this.setData({ pos: storage.get('pos', { left: 0, top: 0 }) })
-  },
-
-  onHide() {
-    storage.set('pos', this.data.pos)
+    this.loadWeatherForCity(this.data.activeCityIndex)
   },
 
   onShareAppMessage() {
