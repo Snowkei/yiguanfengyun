@@ -2,6 +2,10 @@
  * 天气 API 模块
  * 使用 Open-Meteo（完全免费，无需 API Key）
  * https://open-meteo.com/
+ *
+ * 扩展：
+ * - WAQI API 获取真实 PM2.5 / AQI（免费 demo token）
+ * - 和风天气 API 获取生活指数（免费）
  */
 
 // ========== WMO 天气代码 → 中文描述 ==========
@@ -49,44 +53,105 @@ function wmoToWeather(code) {
 }
 
 // ========== 地理编码 ==========
+
+// 常见城市别名/简称 → 标准名映射
+const CITY_ALIASES = {
+  '北京': 'Beijing',
+  '上海': 'Shanghai',
+  '广州': 'Guangzhou',
+  '深圳': 'Shenzhen',
+  '杭州': 'Hangzhou',
+  '成都': 'Chengdu',
+  '武汉': 'Wuhan',
+  '南京': 'Nanjing',
+  '重庆': 'Chongqing',
+  '西安': "Xi'an",
+  '长沙': 'Changsha',
+  '天津': 'Tianjin',
+  '苏州': 'Suzhou',
+  '郑州': 'Zhengzhou',
+  '青岛': 'Qingdao',
+  '大连': 'Dalian',
+  '厦门': 'Xiamen',
+  '昆明': 'Kunming',
+  '哈尔滨': 'Harbin',
+  '沈阳': 'Shenyang',
+  '济南': 'Jinan',
+  '福州': 'Fuzhou',
+  '合肥': 'Hefei',
+  '长春': 'Changchun',
+  '南宁': 'Nanning',
+  '贵阳': 'Guiyang',
+  '太原': 'Taiyuan',
+  '南昌': 'Nanchang',
+  '兰州': 'Lanzhou',
+  '海口': 'Haikou',
+  '银川': 'Yinchuan',
+  '呼和浩特': 'Hohhot',
+  '拉萨': 'Lhasa',
+  '乌鲁木齐': 'Urumqi',
+  '石家庄': 'Shijiazhuang',
+  '香港': 'Hong Kong',
+  '澳门': 'Macau',
+  '台北': 'Taipei',
+}
+
 function geocode(cityName) {
   return new Promise((resolve, reject) => {
-    // 清理城市名：去掉"市"、"区"等后缀，也支持带后缀
     let searchName = cityName.trim()
+
+    // 清理后缀
+    searchName = searchName.replace(/[市区县镇]$/, '')
+
+    // 尝试1：直接搜索（中文）
+    _geocodeSearch(searchName)
+      .then(resolve)
+      .catch(() => {
+        // 尝试2：用英文名搜索（如果有映射）
+        if (CITY_ALIASES[searchName]) {
+          _geocodeSearch(CITY_ALIASES[searchName])
+            .then(resolve)
+            .catch(() => {
+              // 尝试3：加"市"后缀
+              _geocodeSearch(searchName + '市')
+                .then(resolve)
+                .catch(() => {
+                  // 尝试4：加"市"后缀后用英文搜索
+                  if (CITY_ALIASES[searchName + '市']) {
+                    _geocodeSearch(CITY_ALIASES[searchName + '市'])
+                      .then(resolve)
+                      .catch(() => reject(new Error('未找到城市: ' + cityName)))
+                  } else {
+                    reject(new Error('未找到城市: ' + cityName))
+                  }
+                })
+            })
+        } else {
+          // 尝试3：加"市"后缀
+          _geocodeSearch(searchName + '市')
+            .then(resolve)
+            .catch(() => reject(new Error('未找到城市: ' + cityName)))
+        }
+      })
+  })
+}
+
+function _geocodeSearch(name) {
+  return new Promise((resolve, reject) => {
     wx.request({
       url: 'https://geocoding-api.open-meteo.com/v1/search',
       data: {
-        name: searchName,
+        name: name,
         count: 5,
         language: 'zh',
         format: 'json',
       },
       success(res) {
-        if (res.statusCode !== 200 || !res.data || !res.data.results || res.data.results.length === 0) {
-          // 尝试加"市"后缀再搜
-          if (!searchName.endsWith('市') && !searchName.endsWith('区') && !searchName.endsWith('县')) {
-            wx.request({
-              url: 'https://geocoding-api.open-meteo.com/v1/search',
-              data: {
-                name: searchName + '市',
-                count: 5,
-                language: 'zh',
-              },
-              success(res2) {
-                if (res2.statusCode === 200 && res2.data && res2.data.results && res2.data.results.length > 0) {
-                  resolve(_pickBestCity(res2.data.results, searchName))
-                } else {
-                  reject(new Error('未找到城市: ' + cityName))
-                }
-              },
-              fail: reject,
-            })
-          } else {
-            reject(new Error('未找到城市: ' + cityName))
-          }
-          return
+        if (res.statusCode === 200 && res.data && res.data.results && res.data.results.length > 0) {
+          resolve(_pickBestCity(res.data.results, name))
+        } else {
+          reject(new Error('未找到: ' + name))
         }
-        resolve(_pickBestCity(res.data.results, searchName))
       },
       fail: reject,
     })
@@ -264,6 +329,9 @@ function _parseWeatherData(raw) {
     hourly: hourlyData,
     daily: dailyData,
     raw,
+    // 保存原始请求坐标，供后续补充数据请求使用
+    _lat: raw.latitude || null,
+    _lon: raw.longitude || null,
   }
 }
 
@@ -298,11 +366,148 @@ function fetchWeatherByCity(cityName) {
   })
 }
 
+// ========== WAQI API 获取真实 PM2.5 ==========
+// 免费 demo token，每天 1000 次请求
+const WAQI_TOKEN = 'demo'
+
+function fetchAQI(lat, lon) {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url: `https://api.waqi.info/feed/geo:${lat};${lon}/`,
+      data: { token: WAQI_TOKEN },
+      success(res) {
+        if (res.statusCode === 200 && res.data && res.data.status === 'ok') {
+          const d = res.data.data
+          const iaqi = d.iaqi || {}
+          resolve({
+            aqi: d.aqi || 0,
+            pm25: iaqi.pm25 ? iaqi.pm25.v : null,
+            pm10: iaqi.pm10 ? iaqi.pm10.v : null,
+            no2: iaqi.no2 ? iaqi.no2.v : null,
+            so2: iaqi.so2 ? iaqi.so2.v : null,
+            co: iaqi.co ? iaqi.co.v : null,
+            o3: iaqi.o3 ? iaqi.o3.v : null,
+            station: d.city ? d.city.name : '',
+            time: d.time ? d.time.iso : '',
+          })
+        } else {
+          // WAQI 失败时返回 null，由调用方降级
+          resolve(null)
+        }
+      },
+      fail() {
+        resolve(null)
+      },
+    })
+  })
+}
+
+// ========== 和风天气 - 生活指数 ==========
+// 免费 API（devapi），无需 key
+// 生活指数类型: 1穿衣 3感冒 4运动 5紫外线 6洗车 7旅游 9防晒 10舒适度 11交通 13过敏 14晾晒
+const QWEATHER_INDICES = [1, 3, 4, 5, 6, 7, 9, 10, 13]
+
+function fetchLifeIndices(lat, lon) {
+  return new Promise((resolve, reject) => {
+    // 和风天气生活指数 API（免费）
+    const cityId = `${Math.round(lon * 100)}:${Math.round(lat * 100)}`
+    wx.request({
+      url: 'https://api.qweather.com/v7/indices/now',
+      data: {
+        location: `${Math.round(lon * 100) / 100},${Math.round(lat * 100) / 100}`,
+        type: QWEATHER_INDICES.join(','),
+      },
+      success(res) {
+        if (res.statusCode === 200 && res.data && res.data.code === '200' && res.data.daily) {
+          resolve(res.data.daily.map(item => ({
+            type: parseInt(item.type) || 0,
+            name: item.name || '',
+            level: item.level || '',
+            category: item.category || '',
+            text: item.text || '',
+          })))
+        } else {
+          resolve(null)
+        }
+      },
+      fail() {
+        resolve(null)
+      },
+    })
+  })
+}
+
+// ========== 智能生活指数生成 ==========
+// 当 API 不可用时，根据天气数据生成基础生活指数
+function generateLifeIndices(weatherData) {
+  if (!weatherData || !weatherData.current) return []
+  const cur = weatherData.current
+  const today = weatherData.daily && weatherData.daily[0] ? weatherData.daily[0] : {}
+
+  const indices = []
+
+  // 穿衣指数
+  const temp = cur.temp
+  let dressLevel, dressCategory
+  if (temp <= 0) { dressLevel = '7'; dressCategory = '寒冷' }
+  else if (temp <= 10) { dressLevel = '6'; dressCategory = '冷' }
+  else if (temp <= 18) { dressLevel = '4'; dressCategory = '舒适' }
+  else if (temp <= 25) { dressLevel = '3'; dressCategory = '热' }
+  else { dressLevel = '2'; dressCategory = '炎热' }
+  indices.push({ type: 1, name: '穿衣指数', level: dressLevel, category: dressCategory, text: `当前温度${temp}°C，建议${dressCategory === '炎热' || dressCategory === '热' ? '穿轻薄透气衣物' : dressCategory === '舒适' ? '穿薄外套' : '注意保暖添衣'}` })
+
+  // 运动指数
+  const rain = cur.weather.indexOf('雨') !== -1
+  const snow = cur.weather.indexOf('雪') !== -1
+  const fog = cur.weather.indexOf('雾') !== -1
+  const severe = temp > 35 || temp < -5
+  let sportLevel, sportCategory, sportText
+  if (rain || snow || severe) { sportLevel = '7'; sportCategory = '不宜'; sportText = rain ? '降雨天气，不宜户外运动' : snow ? '降雪天气，路面湿滑' : '极端温度，建议室内运动' }
+  else if (fog || cur.windSpeed > 40) { sportLevel = '5'; sportCategory = '较不宜'; sportText = '天气条件一般，建议轻度运动' }
+  else { sportLevel = '2'; sportCategory = '适宜'; sportText = '天气条件良好，适合户外运动' }
+  indices.push({ type: 4, name: '运动指数', level: sportLevel, category: sportCategory, text: sportText })
+
+  // 紫外线指数
+  const uvVal = today.uvIndex || 3
+  let uvLevel, uvCategory
+  if (uvVal <= 2) { uvLevel = '1'; uvCategory = '弱' }
+  else if (uvVal <= 5) { uvLevel = '3'; uvCategory = '中等' }
+  else if (uvVal <= 7) { uvLevel = '5'; uvCategory: '强' }
+  else { uvLevel = '7'; uvCategory = '很强' }
+  indices.push({ type: 5, name: '紫外线指数', level: uvLevel, category: uvCategory, text: `紫外线${uvCategory}，${uvVal > 5 ? '建议涂抹防晒霜' : '外出注意防护'}` })
+
+  // 感冒指数
+  let coldLevel, coldCategory
+  if (cur.humidity > 80 && (temp < 5 || temp > 30)) { coldLevel = '5'; coldCategory = '较易发' }
+  else if (cur.humidity > 70 || temp < 0) { coldLevel = '3'; coldCategory: '较易发' }
+  else { coldLevel = '1'; coldCategory = '少发' }
+  indices.push({ type: 3, name: '感冒指数', level: coldLevel, category: coldCategory, text: `${coldCategory}感冒，请注意${temp < 10 ? '保暖' : '补水'}` })
+
+  // 洗车指数
+  if (rain || snow) {
+    indices.push({ type: 6, name: '洗车指数', level: '7', category: '不宜', text: '近期有降水，不宜洗车' })
+  } else {
+    indices.push({ type: 6, name: '洗车指数', level: '1', category: '适宜', text: '未来无降水，适合洗车' })
+  }
+
+  // 旅游指数
+  let travelLevel, travelCategory
+  if (rain || snow || temp > 38 || temp < -10) { travelLevel = '7'; travelCategory = '不宜' }
+  else if (fog || cur.windSpeed > 30) { travelLevel = '4'; travelCategory = '一般' }
+  else { travelLevel = '1'; travelCategory = '适宜' }
+  indices.push({ type: 7, name: '旅游指数', level: travelLevel, category: travelCategory, text: weatherData.current.weather + '，出游' + travelCategory })
+
+  return indices
+}
+
 module.exports = {
   geocode,
   fetchWeather,
   fetchWeatherByLocation,
   fetchWeatherByCity,
+  fetchAQI,
+  fetchLifeIndices,
+  generateLifeIndices,
   wmoToWeather,
   WMO_CODES,
   degreeToDir,

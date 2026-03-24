@@ -180,6 +180,34 @@
               </view>
             </view>
           </view>
+          <!-- 污染物详情 -->
+          <view class="pollutants-grid" wx:if="{{aqiDetail && aqiDetail.pollutants}}">
+            <view class="pollutant-item" wx:for="{{aqiDetail.pollutants}}" wx:key="key">
+              <view class="pollutant-name">{{item.key}}</view>
+              <view class="pollutant-value" style="color: {{item.color}}">{{item.value}}</view>
+            </view>
+          </view>
+          <view class="aqi-source" wx:if="{{aqiDetail && aqiDetail.station}}">
+            <text class="source-text">📍 {{aqiDetail.station}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- ====== 生活指数 ====== -->
+      <view class="section fade-in-up" wx:if="{{lifeIndices.length > 0}}">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">💡</text>
+            <text>生活指数</text>
+          </view>
+          <view class="indices-grid">
+            <view class="index-item" wx:for="{{lifeIndices}}" wx:key="type">
+              <view class="index-icon">{{item.icon}}</view>
+              <view class="index-name">{{item.name}}</view>
+              <view class="index-category">{{item.category}}</view>
+              <view class="index-text">{{item.text}}</view>
+            </view>
+          </view>
         </view>
       </view>
 

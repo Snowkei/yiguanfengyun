@@ -3,7 +3,7 @@
  */
 const api = require('../../utils/api.js')
 const weather = require('../../utils/weather.js')
-const { storage, showError } = require('../../utils/helpers')
+const { storage, showError } = require('../../utils/helpers.js')
 const { getWeatherGradient, formatDate, calcPM, getGreeting } = weather
 
 const app = getApp()
@@ -38,6 +38,12 @@ Page({
     // 预报
     hourlyData: [],
     dailyData: [],
+
+    // 空气质量详情
+    aqiDetail: null,
+
+    // 生活指数
+    lifeIndices: [],
 
     // 背景
     bgStyle: '',
@@ -89,6 +95,14 @@ Page({
     api.fetchWeatherByLocation()
       .then(data => {
         this._applyWeatherData(data, '当前定位')
+        // 异步加载补充数据（不阻塞主流程）
+        if (data._lat && data._lon) {
+          this._loadExtraData(data._lat, data._lon, data)
+        } else if (data.cityInfo) {
+          this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
+        } else {
+          this._loadExtraData(39.9042, 116.4074, data)
+        }
         this.setData({ loading: false, refreshing: false })
         storage.set('weatherCache', { data, time: Date.now() })
       })
@@ -107,6 +121,10 @@ Page({
       .then(data => {
         const name = data.cityInfo ? data.cityInfo.name : cityName
         this._applyWeatherData(data, name)
+        // 异步加载补充数据
+        if (data.cityInfo) {
+          this._loadExtraData(data.cityInfo.latitude, data.cityInfo.longitude, data)
+        }
         this.setData({ loading: false })
         storage.set('weatherCache', { data, time: Date.now() })
       })
@@ -117,13 +135,76 @@ Page({
       })
   },
 
+  // ========== 加载补充数据（WAQI + 生活指数）==========
+  _loadExtraData(lat, lon, weatherData) {
+    // 并行请求 WAQI 和生活指数
+    api.fetchAQI(lat, lon).then(aqiData => {
+      if (aqiData && aqiData.pm25 !== null) {
+        // 有真实 PM2.5 数据
+        const pmVal = Math.round(aqiData.pm25)
+        const pm = calcPM(pmVal)
+        this.setData({
+          pm,
+          aqiDetail: {
+            ...aqiData,
+            pollutants: [
+              { key: 'PM2.5', value: aqiData.pm25, color: pm.color },
+              { key: 'PM10', value: aqiData.pm10 || '--', color: pm.color },
+              { key: 'NO₂', value: aqiData.no2 || '--', color: '#667eea' },
+              { key: 'SO₂', value: aqiData.so2 || '--', color: '#667eea' },
+              { key: 'CO', value: aqiData.co || '--', color: '#667eea' },
+              { key: 'O₃', value: aqiData.o3 || '--', color: '#667eea' },
+            ],
+          },
+        })
+      }
+      // 如果 WAQI 失败，保持估算值（已在 _applyWeatherData 中设置）
+    }).catch(() => {})
+
+    // 生活指数：先尝试和风天气 API，失败则用本地生成
+    api.fetchLifeIndices(lat, lon).then(indices => {
+      if (indices && indices.length > 0) {
+        this.setData({ lifeIndices: this._formatIndices(indices) })
+      } else {
+        // 降级：本地生成
+        const generated = api.generateLifeIndices(weatherData)
+        this.setData({ lifeIndices: this._formatIndices(generated) })
+      }
+    }).catch(() => {
+      // 降级：本地生成
+      const generated = api.generateLifeIndices(weatherData)
+      this.setData({ lifeIndices: this._formatIndices(generated) })
+    })
+  },
+
+  // 格式化生活指数用于展示
+  _formatIndices(indices) {
+    if (!indices || indices.length === 0) return []
+    const iconMap = {
+      1: '👔',  // 穿衣
+      3: '💊',  // 感冒
+      4: '🏃',  // 运动
+      5: '☀️',  // 紫外线
+      6: '🚗',  // 洗车
+      7: '🏖️', // 旅游
+      9: '🧴',  // 防晒
+      10: '😊', // 舒适度
+      13: '🤧', // 过敏
+      14: '👕', // 晾晒
+    }
+    return indices.map(item => ({
+      ...item,
+      icon: iconMap[item.type] || '📋',
+    }))
+  },
+
   // 应用天气数据到页面
   _applyWeatherData(data, cityName) {
     const cur = data.current
     const today = data.daily[0] || {}
     const gradient = getWeatherGradient(cur.weather)
 
-    // PM2.5 估算（Open-Meteo 不提供 PM2.5，根据天气状况估算）
+    // PM2.5 估算（降级值，WAQI 真实数据会覆盖）
     const pmVal = this._estimatePM(cur)
     const pm = calcPM(pmVal)
 
@@ -142,6 +223,10 @@ Page({
         tempColor: this._getTempColor(d.low, d.high),
       }
     })
+
+    // 保存坐标供后续补充数据请求使用
+    data._lat = data.cityInfo ? data.cityInfo.latitude : 39.9042
+    data._lon = data.cityInfo ? data.cityInfo.longitude : 116.4074
 
     this.setData({
       cityName: cityName || '当前位置',
@@ -163,6 +248,9 @@ Page({
       sunset: today.sunset || '--:--',
       precipProb: today.precipProb !== undefined ? String(today.precipProb) : '--',
       updateTime: formatDate(new Date(), 'MM-dd hh:mm'),
+      // 清空旧的补充数据
+      aqiDetail: null,
+      lifeIndices: [],
     })
   },
 
