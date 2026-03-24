@@ -184,6 +184,48 @@ function cmpVersion(left, right) {
   return 0
 }
 
+// 天气图标映射（emoji）
+const weatherIcons = {
+  '晴': '☀️',
+  '多云': '⛅',
+  '阴': '☁️',
+  '小雨': '🌦️',
+  '中雨': '🌧️',
+  '大雨': '🌧️',
+  '暴雨': '⛈️',
+  '雷阵雨': '⛈️',
+  '阵雨': '🌦️',
+  '小雪': '🌨️',
+  '中雪': '🌨️',
+  '大雪': '❄️',
+  '雾': '🌫️',
+  '霾': '😷',
+  '沙尘暴': '🌪️',
+  'default': '🌤️',
+}
+
+// 获取天气图标
+function getWeatherIcon(weather) {
+  if (!weather) return weatherIcons.default
+  for (let key in weatherIcons) {
+    if (weather.indexOf(key) !== -1) {
+      return weatherIcons[key]
+    }
+  }
+  return weatherIcons.default
+}
+
+// 获取星期几
+function getWeekDay(date) {
+  if (!date) return '--'
+  if (!(date instanceof Date)) {
+    date = new Date(date)
+  }
+  if (isNaN(date.getTime())) return '--'
+  const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  return weekDays[date.getDay()]
+}
+
 module.exports = {
   weatherIcons,
   weatherGradients,
