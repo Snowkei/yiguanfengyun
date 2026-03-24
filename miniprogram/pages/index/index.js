@@ -55,6 +55,17 @@ Page({
     bgStyle: '',
     gradientColors: ['#667eea', '#764ba2'],
 
+    // 天气动画
+    weatherEffectClass: '',
+
+    // 日出日落
+    sunProgress: 0,
+    sunProgressPct: 0,
+    sunX: 0,
+    sunY: 0,
+    daylightRemaining: '',
+    nextSunEvent: '',
+
     // 搜索面板
     searchPanelShow: false,
     searchText: '',

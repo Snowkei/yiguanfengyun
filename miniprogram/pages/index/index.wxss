@@ -4,6 +4,114 @@
 /* 背景 */
 .page-bg { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; }
 
+/* ===== 天气动画效果 ===== */
+.weather-effects { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+
+/* 雨滴 */
+.rain-drop {
+  position: absolute; top: -20rpx; left: var(--left); width: 2rpx; height: 40rpx;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.4));
+  border-radius: 2rpx; animation: rain-fall var(--dur) linear infinite; animation-delay: var(--delay);
+}
+.effect-heavy-rain .rain-drop { height: 60rpx; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.55)); }
+@keyframes rain-fall {
+  0% { transform: translateY(-40rpx); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* 雪花 */
+.snowflake {
+  position: absolute; top: -20rpx; left: var(--left); width: var(--size); height: var(--size);
+  background: #fff; border-radius: 50%; opacity: 0.8;
+  animation: snow-fall var(--dur) linear infinite; animation-delay: var(--delay);
+  box-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+@keyframes snow-fall {
+  0% { transform: translateY(-20rpx) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { transform: translateY(50vh) translateX(30rpx) rotate(180deg); }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(100vh) translateX(-20rpx) rotate(360deg); opacity: 0; }
+}
+
+/* 雾 */
+.fog-layer { position: absolute; width: 200%; height: 100%; opacity: 0.3; }
+.fog-1 { top: 20%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); animation: fog-drift 12s ease-in-out infinite; }
+.fog-2 { top: 45%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); animation: fog-drift 16s ease-in-out infinite reverse; }
+.fog-3 { top: 70%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); animation: fog-drift 14s ease-in-out infinite 3s; }
+@keyframes fog-drift {
+  0% { transform: translateX(-50%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* 闪电 */
+.lightning-flash {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.15); animation: lightning 4s ease-in-out infinite;
+}
+@keyframes lightning {
+  0%, 92%, 94%, 96%, 100% { opacity: 0; }
+  93% { opacity: 1; }
+  95% { opacity: 0.5; }
+}
+
+/* ===== 日出日落弧线 ===== */
+.sun-arc-wrap { display: flex; justify-content: center; padding: 16rpx 0 8rpx; }
+.sun-arc { position: relative; width: 500rpx; height: 260rpx; }
+
+/* 弧线路径（背景） */
+.sun-arc-path {
+  position: absolute; bottom: 40rpx; left: 0; width: 100%; height: 200rpx;
+  border: 3rpx solid rgba(0,0,0,0.06); border-bottom: none;
+  border-radius: 250rpx 250rpx 0 0; box-sizing: border-box;
+}
+/* 弧线填充（进度） */
+.sun-arc-fill {
+  position: absolute; bottom: 40rpx; left: 0; width: 100%; height: 200rpx;
+  border: 3rpx solid #ffa726; border-bottom: none;
+  border-radius: 250rpx 250rpx 0 0; box-sizing: border-box;
+  transition: clip-path 0.5s ease;
+}
+/* 地平线 */
+.sun-horizon {
+  position: absolute; bottom: 38rpx; left: -10rpx; right: -10rpx; height: 2rpx;
+  background: linear-gradient(90deg, rgba(0,0,0,0.04), rgba(0,0,0,0.1), rgba(0,0,0,0.04));
+}
+/* 太阳点 */
+.sun-arc-dot {
+  position: absolute; z-index: 2; transition: all 0.5s ease;
+  width: 56rpx; height: 56rpx; margin-left: -28rpx; margin-bottom: -28rpx;
+}
+.sun-dot-icon {
+  font-size: 56rpx; filter: drop-shadow(0 0 12px rgba(255,167,38,0.6));
+  display: block;
+}
+/* 标签 */
+.sun-label-left, .sun-label-right {
+  position: absolute; bottom: 0; display: flex; flex-direction: column; align-items: center;
+}
+.sun-label-left { left: 0; }
+.sun-label-right { right: 0; }
+.sun-label-center {
+  position: absolute; bottom: 80rpx; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center;
+}
+.sun-lbl-time { font-size: 26rpx; font-weight: 600; color: #333; }
+.sun-lbl-text { font-size: 20rpx; color: #999; margin-top: 2rpx; }
+.sun-lb-hint { font-size: 22rpx; color: #999; }
+
+/* 分享按钮 */
+.share-btn {
+  margin-left: auto; display: flex; align-items: center; gap: 6rpx;
+  padding: 8rpx 20rpx; border-radius: 24rpx;
+  background: rgba(102,126,234,0.1);
+}
+.share-icon { font-size: 24rpx; }
+.share-text { font-size: 22rpx; color: #667eea; font-weight: 500; }
+
 /* ===== 导航栏 ===== */
 .nav-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;

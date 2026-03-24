@@ -4,6 +4,61 @@
   <!-- 背景 -->
   <view class="page-bg" style="{{bgStyle}}"></view>
 
+  <!-- 天气动画效果 -->
+  <view class="weather-effects {{weatherEffectClass}}">
+    <!-- 雨滴 -->
+    <block wx:if="{{weatherEffectClass === 'effect-rain' || weatherEffectClass === 'effect-heavy-rain'}}">
+      <view class="rain-drop" style="--delay: 0s; --left: 10%; --dur: 0.8s"></view>
+      <view class="rain-drop" style="--delay: 0.15s; --left: 20%; --dur: 0.7s"></view>
+      <view class="rain-drop" style="--delay: 0.3s; --left: 30%; --dur: 0.9s"></view>
+      <view class="rain-drop" style="--delay: 0.1s; --left: 40%; --dur: 0.75s"></view>
+      <view class="rain-drop" style="--delay: 0.25s; --left: 50%; --dur: 0.85s"></view>
+      <view class="rain-drop" style="--delay: 0.4s; --left: 60%; --dur: 0.7s"></view>
+      <view class="rain-drop" style="--delay: 0.05s; --left: 70%; --dur: 0.8s"></view>
+      <view class="rain-drop" style="--delay: 0.2s; --left: 80%; --dur: 0.9s"></view>
+      <view class="rain-drop" style="--delay: 0.35s; --left: 90%; --dur: 0.75s"></view>
+      <view class="rain-drop" style="--delay: 0.12s; --left: 15%; --dur: 0.82s"></view>
+      <view class="rain-drop" style="--delay: 0.28s; --left: 35%; --dur: 0.68s"></view>
+      <view class="rain-drop" style="--delay: 0.18s; --left: 55%; --dur: 0.88s"></view>
+      <view class="rain-drop" style="--delay: 0.32s; --left: 75%; --dur: 0.72s"></view>
+      <view class="rain-drop" style="--delay: 0.08s; --left: 45%; --dur: 0.78s"></view>
+      <view class="rain-drop" style="--delay: 0.22s; --left: 65%; --dur: 0.86s"></view>
+    </block>
+    <!-- 雪花 -->
+    <block wx:if="{{weatherEffectClass === 'effect-snow'}}">
+      <view class="snowflake" style="--delay: 0s; --left: 10%; --dur: 4s; --size: 6px"></view>
+      <view class="snowflake" style="--delay: 0.8s; --left: 25%; --dur: 5s; --size: 8px"></view>
+      <view class="snowflake" style="--delay: 1.5s; --left: 40%; --dur: 4.5s; --size: 5px"></view>
+      <view class="snowflake" style="--delay: 0.3s; --left: 55%; --dur: 5.5s; --size: 7px"></view>
+      <view class="snowflake" style="--delay: 1.2s; --left: 70%; --dur: 4.2s; --size: 6px"></view>
+      <view class="snowflake" style="--delay: 2s; --left: 85%; --dur: 5.2s; --size: 8px"></view>
+      <view class="snowflake" style="--delay: 0.5s; --left: 15%; --dur: 4.8s; --size: 5px"></view>
+      <view class="snowflake" style="--delay: 1.8s; --left: 35%; --dur: 5.1s; --size: 7px"></view>
+      <view class="snowflake" style="--delay: 1s; --left: 60%; --dur: 4.3s; --size: 6px"></view>
+      <view class="snowflake" style="--delay: 2.3s; --left: 80%; --dur: 5.4s; --size: 5px"></view>
+      <view class="snowflake" style="--delay: 0.6s; --left: 48%; --dur: 4.6s; --size: 8px"></view>
+      <view class="snowflake" style="--delay: 1.4s; --left: 92%; --dur: 5s; --size: 6px"></view>
+    </block>
+    <!-- 雾 -->
+    <block wx:if="{{weatherEffectClass === 'effect-fog'}}">
+      <view class="fog-layer fog-1"></view>
+      <view class="fog-layer fog-2"></view>
+      <view class="fog-layer fog-3"></view>
+    </block>
+    <!-- 雷暴 -->
+    <block wx:if="{{weatherEffectClass === 'effect-thunder'}}">
+      <view class="lightning-flash"></view>
+      <view class="rain-drop" style="--delay: 0s; --left: 10%; --dur: 0.6s"></view>
+      <view class="rain-drop" style="--delay: 0.1s; --left: 25%; --dur: 0.55s"></view>
+      <view class="rain-drop" style="--delay: 0.2s; --left: 40%; --dur: 0.65s"></view>
+      <view class="rain-drop" style="--delay: 0.05s; --left: 55%; --dur: 0.58s"></view>
+      <view class="rain-drop" style="--delay: 0.15s; --left: 70%; --dur: 0.62s"></view>
+      <view class="rain-drop" style="--delay: 0.25s; --left: 85%; --dur: 0.55s"></view>
+      <view class="rain-drop" style="--delay: 0.08s; --left: 30%; --dur: 0.63s"></view>
+      <view class="rain-drop" style="--delay: 0.18s; --left: 60%; --dur: 0.57s"></view>
+    </block>
+  </view>
+
   <!-- 骨架屏 -->
   <skeleton wx:if="{{loading && !refreshing}}"></skeleton>
 
@@ -164,12 +219,58 @@
         </view>
       </view>
 
+      <!-- ====== 日出日落 ====== -->
+      <view class="section fade-in-up">
+        <view class="glass-card">
+          <view class="card-title">
+            <text class="icon">🌅</text>
+            <text>日出日落</text>
+          </view>
+          <view class="sun-arc-wrap">
+            <view class="sun-arc">
+              <!-- 弧线背景 -->
+              <view class="sun-arc-path"></view>
+              <!-- 弧线进度 -->
+              <view class="sun-arc-fill" style="clip-path: polygon(0 0, {{sunProgressPct}}% 0, {{sunProgressPct}}% 100%, 0 100%)"></view>
+              <!-- 太阳 -->
+              <view class="sun-arc-dot" style="left: {{sunX}}px; bottom: {{sunY}}px">
+                <text class="sun-dot-icon">☀️</text>
+              </view>
+              <!-- 地平线 -->
+              <view class="sun-horizon"></view>
+              <!-- 标签 -->
+              <view class="sun-label-left">
+                <text class="sun-lbl-time">{{sunrise}}</text>
+                <text class="sun-lbl-text">日出</text>
+              </view>
+              <view class="sun-label-right">
+                <text class="sun-lbl-time">{{sunset}}</text>
+                <text class="sun-lbl-text">日落</text>
+              </view>
+              <view class="sun-label-center" wx:if="{{sunProgress > 0 && sunProgress < 1}}">
+                <text class="sun-lb-hint">白天还剩 {{daylightRemaining}}</text>
+              </view>
+              <view class="sun-label-center" wx:elif="{{sunProgress >= 1}}">
+                <text class="sun-lb-hint">已日落 · {{nextSunEvent}}</text>
+              </view>
+              <view class="sun-label-center" wx:else>
+                <text class="sun-lb-hint">未日出 · {{nextSunEvent}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
       <!-- ====== 天气详情 ====== -->
       <view class="section fade-in-up">
         <view class="glass-card">
           <view class="card-title">
             <text class="icon">🌡️</text>
             <text>天气详情</text>
+            <view class="share-btn" catchtap="onShareCard">
+              <text class="share-icon">📤</text>
+              <text class="share-text">分享</text>
+            </view>
           </view>
           <view class="detail-grid">
             <view class="detail-cell">
@@ -196,11 +297,6 @@
               <view class="detail-icon">☀️</view>
               <view class="detail-label">紫外线</view>
               <view class="detail-value">{{uvIndex}}</view>
-            </view>
-            <view class="detail-cell">
-              <view class="detail-icon">🌅</view>
-              <view class="detail-label">日出 / 日落</view>
-              <view class="detail-value">{{sunrise}} / {{sunset}}</view>
             </view>
             <view class="detail-cell">
               <view class="detail-icon">📊</view>
