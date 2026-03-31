@@ -65,14 +65,15 @@
   <!-- 正式内容（加载完成或正在刷新时保留显示） -->
   <block wx:if="{{!loading || refreshing}}">
 
-    <!-- 顶部导航栏 -->
-    <view class="nav-bar" style="padding-top: {{statusBarHeight}}px; height: calc({{navBarTotalHeight}}px - {{statusBarHeight}}px)">
-      <view class="nav-content">
+    <!-- 顶部导航栏：高度 = 状态栏 + 内容区，右侧留出胶囊按钮空间 -->
+    <view class="nav-bar" style="height: {{navBarTotalHeight}}px; padding-top: {{statusBarHeight}}px">
+      <view class="nav-content" style="height: {{navBarContentHeight}}px; padding-right: {{menuButtonLeft > 0 ? (menuButtonLeft - 8) + 'px' : '100px'}}">
         <!-- 城市标签栏 -->
         <view class="city-tabs">
           <view class="city-tab {{activeCityIndex === index ? 'active' : ''}}" 
             wx:for="{{savedCities}}" wx:key="index"
-            catchtap="switchCity" data-index="{{index}}">
+            catchtap="switchCity" data-index="{{index}}"
+            bindlongpress="onCityLongPress" data-city-index="{{index}}">
             {{item.name}}
           </view>
           <view class="city-tab-add" catchtap="goCityChoose">

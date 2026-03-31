@@ -116,9 +116,10 @@
 .nav-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   background: rgba(0,0,0,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-sizing: border-box;
 }
 .nav-content {
-  height: 100%; display: flex; align-items: center; padding: 0 16rpx;
+  display: flex; align-items: center; padding-left: 16rpx;
   box-sizing: border-box;
 }
 

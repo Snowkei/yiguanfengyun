@@ -18,7 +18,7 @@ Page({
   onShow() {
     this.setData({
       statusBarHeight: getApp().globalData.statusBarHeight || 44,
-      navBarTotalHeight: getApp().globalData.navBarTotalHeight || (getApp().globalData.statusBarHeight + 88),
+      navBarTotalHeight: getApp().globalData.navBarTotalHeight || 64,
       keepscreenon: getApp().globalData.keepscreenon || false,
     })
     this._checkUpdateSupport()

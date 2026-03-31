@@ -2,7 +2,7 @@
 <view class="diary-page {{isIPhoneX ? 'iphonex-padding' : ''}}">
   
   <!-- 自定义导航栏 -->
-  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px; height: calc({{navBarTotalHeight}}px - {{statusBarHeight}}px)">
+  <view class="nav-bar" style="height: {{navBarTotalHeight}}px; padding-top: {{statusBarHeight}}px">
     <view class="nav-content">
       <view class="nav-title">天气日记</view>
     </view>

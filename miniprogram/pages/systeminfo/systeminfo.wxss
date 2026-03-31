@@ -23,7 +23,7 @@
 
 .sys-content {
   padding: 20rpx 24rpx;
-  padding-top: calc(env(safe-area-inset-top) + 188rpx + 20rpx);
+  padding-top: 20rpx;
 }
 
 .sys-card {
