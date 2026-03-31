@@ -13,6 +13,69 @@
 
   <view class="setting-content">
 
+    <!-- 温度单位 -->
+    <view class="setting-group">
+      <view class="group-title">温度单位</view>
+      <view class="setting-item">
+        <view class="item-label">
+          <text>温度显示</text>
+          <text class="item-desc">选择您偏好的温度单位</text>
+        </view>
+      </view>
+      <view class="temp-unit-options">
+        <view class="temp-unit-btn {{tempUnit === 'celsius' ? 'active' : ''}}" 
+          catchtap="onTempUnitChange" data-unit="celsius">
+          <text class="unit-symbol">°C</text>
+          <text class="unit-name">摄氏度</text>
+        </view>
+        <view class="temp-unit-btn {{tempUnit === 'fahrenheit' ? 'active' : ''}}" 
+          catchtap="onTempUnitChange" data-unit="fahrenheit">
+          <text class="unit-symbol">°F</text>
+          <text class="unit-name">华氏度</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 自动刷新 -->
+    <view class="setting-group">
+      <view class="group-title">自动刷新</view>
+      <view class="setting-item">
+        <view class="item-label">
+          <text>刷新间隔</text>
+          <text class="item-desc">天气数据自动更新频率</text>
+        </view>
+      </view>
+      <view class="refresh-interval-options">
+        <view class="interval-btn {{refreshInterval === 15 ? 'active' : ''}}"
+          catchtap="onRefreshIntervalChange" data-interval="15">15分钟</view>
+        <view class="interval-btn {{refreshInterval === 30 ? 'active' : ''}}"
+          catchtap="onRefreshIntervalChange" data-interval="30">30分钟</view>
+        <view class="interval-btn {{refreshInterval === 60 ? 'active' : ''}}"
+          catchtap="onRefreshIntervalChange" data-interval="60">1小时</view>
+        <view class="interval-btn {{refreshInterval === 120 ? 'active' : ''}}"
+          catchtap="onRefreshIntervalChange" data-interval="120">2小时</view>
+      </view>
+    </view>
+
+    <!-- 缓存管理 -->
+    <view class="setting-group">
+      <view class="group-title">缓存管理</view>
+      <view class="setting-item">
+        <view class="item-label">
+          <text>缓存大小</text>
+          <text class="item-desc">天气数据缓存占用空间</text>
+        </view>
+        <text class="cache-size">{{cacheSize}}</text>
+      </view>
+      <view class="setting-item" catchtap="clearCache">
+        <view class="item-label">
+          <text>清除天气缓存</text>
+          <text class="item-desc">清除后下次将重新加载天气数据</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
     <!-- 显示设置 -->
     <view class="setting-group">
       <view class="group-title">显示设置</view>

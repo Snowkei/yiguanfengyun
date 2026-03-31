@@ -1,0 +1,112 @@
+<!-- 天气日记页面 -->
+<view class="diary-page {{isIPhoneX ? 'iphonex-padding' : ''}}">
+  
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+    <view class="nav-content">
+      <view class="nav-title">天气日记</view>
+    </view>
+  </view>
+
+  <view class="diary-content" style="padding-top: {{statusBarHeight + 88}}px">
+
+    <!-- 写日记区域 -->
+    <view class="write-section">
+      <view class="current-weather" wx:if="{{currentWeather}}">
+        <text class="weather-badge">{{currentWeather}}</text>
+      </view>
+      
+      <!-- 写作面板 -->
+      <view class="write-panel" wx:if="{{isWriting}}">
+        <view class="mood-selector">
+          <text class="mood-label">今天心情：</text>
+          <view class="mood-options">
+            <view 
+              class="mood-item {{mood === item.key ? 'active' : ''}}" 
+              wx:for="{{moods}}" 
+              wx:key="key"
+              catchtap="selectMood" 
+              data-mood="{{item.key}}">
+              <text class="mood-emoji">{{item.emoji}}</text>
+              <text class="mood-text">{{item.label}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <textarea 
+          class="diary-input" 
+          placeholder="记录今天的天气和心情..." 
+          placeholder-class="diary-placeholder"
+          maxlength="500"
+          value="{{content}}"
+          bindinput="onContentInput"
+          auto-focus
+        ></textarea>
+        
+        <view class="write-actions">
+          <button class="btn-cancel" catchtap="cancelWrite">取消</button>
+          <button class="btn-save" catchtap="saveDiary">保存</button>
+        </view>
+      </view>
+      
+      <!-- 写日记按钮 -->
+      <view class="write-btn-wrap" wx:else>
+        <button class="write-btn" catchtap="startWrite">
+          <text class="write-icon">✏️</text>
+          <text>写日记</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 日记列表 -->
+    <view class="diary-list">
+      <view class="list-title">
+        <text>我的日记</text>
+        <text class="diary-count">{{diaries.length}}篇</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{isEmpty}}">
+        <text class="empty-icon">📔</text>
+        <text class="empty-text">还没有日记</text>
+        <text class="empty-hint">点击上方按钮记录今天的天气心情</text>
+      </view>
+
+      <!-- 日记卡片 -->
+      <view class="diary-cards">
+        <view 
+          class="diary-card" 
+          wx:for="{{diaries}}" 
+          wx:key="id"
+          catchtap="viewDiary" 
+          data-id="{{item.id}}">
+          <view class="card-header">
+            <view class="card-date">
+              <text class="date-main">{{item.date}}</text>
+              <text class="date-week">{{item.weekDay}}</text>
+            </view>
+            <view class="card-mood">
+              <text class="mood-emoji-large">{{item.mood === 'happy' ? '😄' : item.mood === 'good' ? '😊' : item.mood === 'normal' ? '🙂' : item.mood === 'sad' ? '😔' : '😢'}}</text>
+            </view>
+          </view>
+          
+          <view class="card-weather" wx:if="{{item.weather}}">
+            <text class="weather-tag">{{item.weather}}</text>
+          </view>
+          
+          <view class="card-content">
+            <text class="content-text">{{item.content}}</text>
+          </view>
+          
+          <view class="card-footer">
+            <text class="card-time">{{item.time}}</text>
+            <view class="card-actions">
+              <text class="delete-btn" catchtap="deleteDiary" data-id="{{item.id}}">删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>

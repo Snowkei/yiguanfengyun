@@ -9,6 +9,10 @@ Page({
     keepscreenon: false,
     SDKVersion: '',
     enableUpdate: true,
+    // 新增设置项
+    tempUnit: 'celsius', // celsius / fahrenheit
+    refreshInterval: 30, // 自动刷新间隔（分钟）
+    cacheSize: '计算中...',
   },
 
   onShow() {
@@ -19,6 +23,7 @@ Page({
     this._checkUpdateSupport()
     this._getScreenBrightness()
     this._loadSetting()
+    this._calcCacheSize()
   },
 
   switchChange(e) {
@@ -44,6 +49,69 @@ Page({
 
     this.setData({ setting })
     storage.set('setting', setting)
+  },
+
+  // ========== 温度单位切换 ==========
+  onTempUnitChange(e) {
+    const unit = e.currentTarget.dataset.unit
+    this.setData({ tempUnit: unit })
+    storage.set('tempUnit', unit)
+    wx.showToast({
+      title: unit === 'celsius' ? '已切换为摄氏度' : '已切换为华氏度',
+      icon: 'success',
+    })
+  },
+
+  // ========== 自动刷新间隔 ==========
+  onRefreshIntervalChange(e) {
+    const interval = parseInt(e.currentTarget.dataset.interval)
+    this.setData({ refreshInterval: interval })
+    storage.set('refreshInterval', interval)
+    wx.showToast({
+      title: `已设置为 ${interval} 分钟`,
+      icon: 'success',
+    })
+  },
+
+  // ========== 计算缓存大小 ==========
+  _calcCacheSize() {
+    try {
+      const info = wx.getStorageInfoSync()
+      const sizeKB = info.currentSize
+      let sizeText = ''
+      if (sizeKB < 1) {
+        sizeText = `${Math.round(sizeKB * 1024)} B`
+      } else if (sizeKB < 1024) {
+        sizeText = `${sizeKB.toFixed(1)} KB`
+      } else {
+        sizeText = `${(sizeKB / 1024).toFixed(2)} MB`
+      }
+      this.setData({ cacheSize: sizeText })
+    } catch (e) {
+      this.setData({ cacheSize: '计算失败' })
+    }
+  },
+
+  // ========== 清除缓存 ==========
+  clearCache() {
+    wx.showModal({
+      title: '确认',
+      content: '确定要清除天气缓存吗？这不会删除您的城市和设置。',
+      confirmText: '清除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 清除天气缓存
+          getApp().clearWeatherCache()
+          // 清除本地存储中的天气相关缓存
+          const keys = ['weatherCache', 'lastWeatherData']
+          keys.forEach(key => storage.remove(key))
+          
+          this._calcCacheSize()
+          wx.showToast({ title: '缓存已清除', icon: 'success' })
+        }
+      },
+    })
   },
 
   // 屏幕亮度
@@ -125,7 +193,9 @@ Page({
   // 加载设置
   _loadSetting() {
     const setting = storage.get('setting', {})
-    this.setData({ setting })
+    const tempUnit = storage.get('tempUnit', 'celsius')
+    const refreshInterval = storage.get('refreshInterval', 30)
+    this.setData({ setting, tempUnit, refreshInterval })
   },
 
   // 悬浮球复位
@@ -144,7 +214,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           storage.remove('setting')
-          this.setData({ setting: {} })
+          storage.remove('tempUnit')
+          storage.remove('refreshInterval')
+          this.setData({ setting: {}, tempUnit: 'celsius', refreshInterval: 30 })
           wx.showToast({ title: '已恢复默认' })
         }
       },
@@ -161,7 +233,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           storage.clear()
-          this.setData({ setting: {}, pos: {} })
+          getApp().clearWeatherCache()
+          this.setData({ setting: {}, pos: {}, tempUnit: 'celsius', refreshInterval: 30 })
+          this._calcCacheSize()
           wx.showToast({ title: '已清除所有数据' })
         }
       },

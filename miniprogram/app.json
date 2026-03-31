@@ -3,6 +3,7 @@
   "requiredPrivateInfos": ["getLocation"],
   "pages": [
     "pages/index/index",
+    "pages/diary/diary",
     "pages/citychoose/citychoose",
     "pages/setting/setting",
     "pages/about/about",
@@ -12,6 +13,32 @@
     "navigationStyle": "custom",
     "backgroundColor": "#f0f4f8",
     "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "🏠首页",
+        "iconPath": "images/tab_home.png",
+        "selectedIconPath": "images/tab_home.png"
+      },
+      {
+        "pagePath": "pages/diary/diary",
+        "text": "📔日记",
+        "iconPath": "images/tab_diary.png",
+        "selectedIconPath": "images/tab_diary.png"
+      },
+      {
+        "pagePath": "pages/setting/setting",
+        "text": "⚙️设置",
+        "iconPath": "images/tab_setting.png",
+        "selectedIconPath": "images/tab_setting.png"
+      }
+    ]
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2"

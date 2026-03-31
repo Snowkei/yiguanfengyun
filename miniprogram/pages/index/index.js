@@ -1,5 +1,5 @@
 /**
- * 易观风云 v2.1 - 主页面
+ * 易观风云 v3.0 - 主页面
  * 支持多城市切换、搜索面板、WAQI 真实 AQI、生活指数
  */
 const api = require('../../utils/api.js')
@@ -11,6 +11,19 @@ const app = getApp()
 
 // 默认保存的城市
 const DEFAULT_CITIES = [{ name: '定位中...', lat: null, lon: null, isLocation: true }]
+
+// 天气代码到动画类别的映射
+const WEATHER_EFFECT_MAP = {
+  'rain': 'effect-rain',
+  'drizzle': 'effect-rain',
+  'thunderstorm': 'effect-thunder',
+  'snow': 'effect-snow',
+  'sleet': 'effect-snow',
+  'fog': 'effect-fog',
+  'mist': 'effect-fog',
+  'haze': 'effect-fog',
+  'heavy rain': 'effect-heavy-rain',
+}
 
 Page({
   data: {
@@ -107,6 +120,53 @@ Page({
     this.loadWeatherForCity(idx)
   },
 
+  // 城市长按删除
+  onCityLongPress(e) {
+    const idx = e.currentTarget.dataset.index
+    const city = this.data.savedCities[idx]
+    
+    // 定位城市不能删除
+    if (city.isLocation) {
+      wx.showToast({ title: '定位城市无法删除', icon: 'none' })
+      return
+    }
+
+    wx.showModal({
+      title: '删除城市',
+      content: `确定删除 ${city.name} 吗？`,
+      confirmText: '删除',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          this.deleteCity(idx)
+        }
+      },
+    })
+  },
+
+  deleteCity(idx) {
+    const cities = [...this.data.savedCities]
+    cities.splice(idx, 1)
+    
+    let newActiveIdx = this.data.activeCityIndex
+    if (idx < this.data.activeCityIndex) {
+      newActiveIdx--
+    } else if (idx === this.data.activeCityIndex) {
+      newActiveIdx = Math.min(newActiveIdx, cities.length - 1)
+    }
+
+    this.setData({
+      savedCities: cities,
+      activeCityIndex: Math.max(0, newActiveIdx),
+    })
+    storage.set('savedCities', cities)
+    
+    // 如果删除的是当前城市，刷新天气
+    if (cities.length > 0) {
+      this.loadWeatherForCity(this.data.activeCityIndex)
+    }
+  },
+
   addCity(cityInfo) {
     // 检查是否已存在
     const exists = this.data.savedCities.some(c => c.name === cityInfo.name)
@@ -130,13 +190,25 @@ Page({
   },
 
   goSetting() {
-    wx.navigateTo({ url: '/pages/setting/setting' })
+    wx.switchTab({ url: '/pages/setting/setting' })
   },
 
   // ========== 加载天气 ==========
   loadWeatherForCity(idx) {
     const city = this.data.savedCities[idx]
     if (!city) return
+    
+    // 检查缓存（5分钟内不重复请求）
+    const cacheKey = city.isLocation ? 'location' : `${city.lat}_${city.lon}`
+    const cachedData = app.getWeatherCache(cacheKey)
+    if (cachedData && !this.data.refreshing) {
+      console.log('使用缓存数据')
+      this._applyWeatherData(cachedData, city.name)
+      this._loadExtraData(city.lat || cachedData.cityInfo?.latitude, city.lon || cachedData.cityInfo?.longitude, cachedData)
+      this.setData({ loading: false })
+      return
+    }
+
     this.setData({ loading: true })
 
     if (city.isLocation || !city.lat) {
@@ -145,6 +217,8 @@ Page({
         .then(data => {
           const name = data.cityInfo ? data.cityInfo.name : '当前定位'
           this._applyWeatherData(data, name)
+          // 缓存数据
+          app.setWeatherCache('location', data)
           // 更新定位城市的坐标
           if (data.cityInfo) {
             const cities = [...this.data.savedCities]
@@ -165,6 +239,8 @@ Page({
       api.fetchWeather(city.lat, city.lon)
         .then(data => {
           this._applyWeatherData(data, city.name)
+          // 缓存数据
+          app.setWeatherCache(cacheKey, data)
           this._loadExtraData(city.lat, city.lon, data)
           this.setData({ loading: false, refreshing: false })
         })
@@ -216,6 +292,120 @@ Page({
     return indices.map(item => ({ ...item, icon: icons[item.type] || '📋' }))
   },
 
+  // ========== 天气动画触发逻辑 ==========
+  _setWeatherEffect(weatherCode, weatherDesc) {
+    const desc = weatherDesc.toLowerCase()
+    
+    // 先检查关键词
+    if (desc.includes('雷')) {
+      this.setData({ weatherEffectClass: 'effect-thunder' })
+      return
+    }
+    if (desc.includes('雪')) {
+      this.setData({ weatherEffectClass: 'effect-snow' })
+      return
+    }
+    if (desc.includes('雨') && (desc.includes('大') || desc.includes('暴'))) {
+      this.setData({ weatherEffectClass: 'effect-heavy-rain' })
+      return
+    }
+    if (desc.includes('雨')) {
+      this.setData({ weatherEffectClass: 'effect-rain' })
+      return
+    }
+    if (desc.includes('雾') || desc.includes('霾') || desc.includes('雾')) {
+      this.setData({ weatherEffectClass: 'effect-fog' })
+      return
+    }
+
+    // 检查天气代码
+    const codeStr = String(weatherCode).toLowerCase()
+    for (const [key, effect] of Object.entries(WEATHER_EFFECT_MAP)) {
+      if (codeStr.includes(key) || desc.includes(key)) {
+        this.setData({ weatherEffectClass: effect })
+        return
+      }
+    }
+
+    // 默认无动画
+    this.setData({ weatherEffectClass: '' })
+  },
+
+  // ========== 日出日落弧线计算 ==========
+  _calcSunProgress(sunrise, sunset) {
+    if (!sunrise || !sunset || sunrise === '--:--' || sunset === '--:--') {
+      return
+    }
+
+    const now = new Date()
+    const todayStr = formatDate(now, 'yyyy-MM-dd')
+    
+    // 解析日出日落时间
+    const srArr = sunrise.split(':')
+    const ssArr = sunset.split(':')
+    
+    const srTime = new Date(todayStr + 'T' + srArr[0] + ':' + srArr[1])
+    const ssTime = new Date(todayStr + 'T' + ssArr[0] + ':' + ssArr[1])
+    
+    // 计算进度
+    const totalDaylight = ssTime - srTime // 白天时长（毫秒）
+    const elapsed = now - srTime // 已过去的时间
+    
+    let progress = 0
+    if (now < srTime) {
+      progress = 0 // 未日出
+    } else if (now > ssTime) {
+      progress = 1 // 已日落
+    } else {
+      progress = elapsed / totalDaylight
+    }
+
+    // 计算太阳位置（基于圆弧）
+    const arcWidth = 280 // 弧线宽度
+    const arcHeight = 80 // 弧线高度
+    
+    // 使用正弦函数计算太阳位置
+    const angle = Math.PI * progress // 0 到 PI
+    const x = (arcWidth / 2) * (1 - Math.cos(angle)) // 从左到右
+    const y = arcHeight * Math.sin(angle) // 弧度
+
+    // 计算剩余白天时间
+    let daylightRemaining = ''
+    let nextSunEvent = ''
+    
+    if (now < srTime) {
+      const waitMs = srTime - now
+      const mins = Math.round(waitMs / 60000)
+      nextSunEvent = `${mins}分钟后日出`
+    } else if (now > ssTime) {
+      // 计算明天日出
+      const tomorrowSr = new Date(srTime.getTime() + 24 * 60 * 60 * 1000)
+      const waitMs = tomorrowSr - now
+      const hours = Math.floor(waitMs / 3600000)
+      const mins = Math.round((waitMs % 3600000) / 60000)
+      nextSunEvent = `${hours}小时${mins}分后日出`
+    } else {
+      const remainingMs = ssTime - now
+      const hours = Math.floor(remainingMs / 3600000)
+      const mins = Math.round((remainingMs % 3600000) / 60000)
+      if (hours > 0) {
+        daylightRemaining = `${hours}小时${mins}分`
+      } else {
+        daylightRemaining = `${mins}分钟`
+      }
+      nextSunEvent = `${sunset}日落`
+    }
+
+    this.setData({
+      sunProgress: progress,
+      sunProgressPct: progress * 100,
+      sunX: x,
+      sunY: y,
+      daylightRemaining,
+      nextSunEvent,
+    })
+  },
+
   _applyWeatherData(data, cityName) {
     const cur = data.current
     const today = data.daily[0] || {}
@@ -235,6 +425,12 @@ Page({
       tempWidth: ((d.high - d.low) / range) * 60 + 10,
       tempColor: this._getTempColor(d.low, d.high),
     }))
+
+    // 设置天气动画
+    this._setWeatherEffect(cur.weatherCode, cur.weather)
+    
+    // 计算日出日落进度
+    this._calcSunProgress(today.sunrise, today.sunset)
 
     this.setData({
       cityName: cityName || '当前位置',
@@ -348,6 +544,8 @@ Page({
   // ========== 下拉刷新 ==========
   onPullDownRefresh() {
     this.setData({ refreshing: true })
+    // 刷新时清除缓存，确保获取最新数据
+    app.clearWeatherCache()
     this._loadWeatherForRefresh(this.data.activeCityIndex)
     // 超时保护，防止刷新状态卡住
     if (this._refreshTimer) clearTimeout(this._refreshTimer)
@@ -398,10 +596,29 @@ Page({
     }
   },
 
+  // ========== 分享功能 ==========
   onShareAppMessage() {
     return {
       title: `${this.data.cityName} ${this.data.currentTemp}° ${this.data.currentWeather} - 易观风云`,
       path: '/pages/index/index',
     }
+  },
+
+  // 朋友圈分享
+  onShareTimeline() {
+    return {
+      title: `${this.data.cityName} ${this.data.currentTemp}° ${this.data.currentWeather}`,
+      query: '',
+      imageUrl: '',
+    }
+  },
+
+  // 分享卡片（生成图片分享）
+  onShareCard() {
+    wx.showToast({
+      title: '卡片分享功能开发中',
+      icon: 'none',
+    })
+    // TODO: 可以使用 wx.canvasToTempFilePath 生成海报
   },
 })

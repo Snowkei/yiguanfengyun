@@ -1,0 +1,352 @@
+/* 天气日记页面样式 */
+
+.diary-page {
+  min-height: 100vh;
+  background: #f0f4f8;
+}
+
+/* 自定义导航栏 */
+.nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.nav-content {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.diary-content {
+  padding: 0 24rpx;
+  padding-bottom: 40rpx;
+}
+
+/* 写日记区域 */
+.write-section {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.current-weather {
+  margin-bottom: 16rpx;
+}
+
+.weather-badge {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+/* 写作面板 */
+.write-panel {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mood-selector {
+  margin-bottom: 20rpx;
+}
+
+.mood-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.mood-options {
+  display: flex;
+  gap: 16rpx;
+}
+
+.mood-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx 8rpx;
+  background: #f5f5f5;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.mood-item.active {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: #667eea;
+}
+
+.mood-emoji {
+  font-size: 36rpx;
+}
+
+.mood-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+
+.mood-item.active .mood-text {
+  color: #667eea;
+}
+
+/* 输入框 */
+.diary-input {
+  width: 100%;
+  min-height: 160rpx;
+  padding: 20rpx;
+  background: #f9f9f9;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+  border: 1rpx solid #eee;
+}
+
+.diary-input:focus {
+  border-color: #667eea;
+}
+
+.diary-placeholder {
+  color: #bbb;
+}
+
+/* 写作按钮 */
+.write-btn-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.write-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  width: 100%;
+  height: 88rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+}
+
+.write-btn::after {
+  border: none;
+}
+
+.write-icon {
+  font-size: 32rpx;
+}
+
+/* 操作按钮 */
+.write-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.btn-cancel,
+.btn-save {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+}
+
+.btn-cancel::after,
+.btn-save::after {
+  border: none;
+}
+
+/* 日记列表 */
+.diary-list {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 24rpx;
+}
+
+.list-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.diary-count {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 400;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+/* 日记卡片 */
+.diary-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.diary-card {
+  background: #f9f9f9;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  transition: all 0.2s;
+}
+
+.diary-card:active {
+  background: #f0f0f0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.card-date {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.date-main {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.date-week {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.card-mood {
+  font-size: 36rpx;
+}
+
+.card-weather {
+  margin-bottom: 12rpx;
+}
+
+.weather-tag {
+  font-size: 20rpx;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.card-content {
+  margin-bottom: 12rpx;
+}
+
+.content-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-time {
+  font-size: 20rpx;
+  color: #bbb;
+}
+
+.card-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.delete-btn {
+  font-size: 22rpx;
+  color: #ff6b6b;
+  padding: 8rpx 16rpx;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8rpx;
+}
+
+/* iPhone X 适配 */
+.iphonex-padding {
+  padding-bottom: 68rpx !important;
+}
