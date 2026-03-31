@@ -19,24 +19,22 @@ App({
       if (wx.getMenuButtonBoundingClientRect) {
         const menuBtn = wx.getMenuButtonBoundingClientRect()
         this.globalData.menuButtonInfo = menuBtn
-        // 导航栏总高度 = 胶囊按钮底部 + 与顶部的对称间距
-        // 公式：statusBarHeight + (menuBtn.top - statusBarHeight) * 2 + menuBtn.height
-        const gap = menuBtn.top - res.statusBarHeight // 胶囊与状态栏的间距
-        this.globalData.navBarContentHeight = menuBtn.height + gap * 2 // 导航栏内容区高度
+        const gap = menuBtn.top - res.statusBarHeight
+        this.globalData.navBarContentHeight = menuBtn.height + gap * 2
         this.globalData.navBarTotalHeight = res.statusBarHeight + menuBtn.height + gap * 2
-        // 胶囊左边界，用于限制城市标签栏宽度，避免与胶囊重叠
-        this.globalData.menuButtonLeft = menuBtn.left
+        // 右侧需要留出的空间 = 屏幕宽度 - 胶囊左边界（即胶囊宽度 + 右边距）
+        this.globalData.navContentPaddingRight = res.windowWidth - menuBtn.left + 4
       } else {
         this.globalData.navBarContentHeight = 44
         this.globalData.navBarTotalHeight = res.statusBarHeight + 44
-        this.globalData.menuButtonLeft = 0
+        this.globalData.navContentPaddingRight = 88
       }
     } catch (e) {
       console.error('getSystemInfoSync failed:', e)
       this.globalData.statusBarHeight = 20
       this.globalData.navBarContentHeight = 44
       this.globalData.navBarTotalHeight = 64
-      this.globalData.menuButtonLeft = 0
+
     }
 
     this.checkUpdate()
