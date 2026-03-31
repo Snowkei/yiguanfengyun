@@ -526,21 +526,27 @@ function _doGetLocation(resolve, reject) {
 }
 
 // 反向地理编码：坐标 → 城市名
+// 使用 Nominatim (OpenStreetMap) 免费逆地理编码，无需 API Key
 function _reverseGeocode(lat, lon) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     wx.request({
-      url: 'https://geocoding-api.open-meteo.com/v1/reverse',
+      url: 'https://nominatim.openstreetmap.org/reverse',
       data: {
-        latitude: lat,
-        longitude: lon,
-        language: 'zh',
-        count: 1,
+        lat: lat,
+        lon: lon,
         format: 'json',
+        'accept-language': 'zh-CN,zh',
+        zoom: 10,  // 城市级别
+      },
+      header: {
+        'User-Agent': 'YiguanFengyun-MiniProgram/3.0',
       },
       success(res) {
-        if (res.statusCode === 200 && res.data && res.data.results && res.data.results.length > 0) {
-          const r = res.data.results[0]
-          resolve(r.name || r.admin1 || '当前位置')
+        if (res.statusCode === 200 && res.data && res.data.address) {
+          const addr = res.data.address
+          // 优先取城市名，依次降级
+          const name = addr.city || addr.town || addr.county || addr.state || '当前位置'
+          resolve(name)
         } else {
           resolve('当前位置')
         }
