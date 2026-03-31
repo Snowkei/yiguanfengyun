@@ -1,5 +1,5 @@
 .skeleton-container {
-  padding: 120rpx 24rpx 0;
+  padding: 0 24rpx;
 }
 
 .skeleton-header {

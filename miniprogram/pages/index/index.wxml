@@ -59,33 +59,33 @@
     </block>
   </view>
 
+  <!-- 顶部导航栏：始终显示，不受 loading 影响 -->
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+    <view class="nav-content" style="height: {{navBarContentHeight}}px; padding-right: {{navContentPaddingRight}}px">
+      <!-- 城市标签栏 -->
+      <view class="city-tabs">
+        <view class="city-tab {{activeCityIndex === index ? 'active' : ''}}" 
+          wx:for="{{savedCities}}" wx:key="index"
+          catchtap="switchCity" data-index="{{index}}"
+          bindlongpress="onCityLongPress" data-city-index="{{index}}">
+          {{item.name}}
+        </view>
+        <view class="city-tab-add" catchtap="goCityChoose">
+          <text class="add-icon">+</text>
+        </view>
+      </view>
+      <!-- 搜索按钮 -->
+      <view class="nav-search-btn" catchtap="showSearchPanel">
+        <text class="nav-search-icon">🔍</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 骨架屏 -->
-  <skeleton wx:if="{{loading && !refreshing}}"></skeleton>
+  <skeleton wx:if="{{loading && !refreshing}}" paddingTop="{{navBarTotalHeight}}"></skeleton>
 
   <!-- 正式内容（加载完成或正在刷新时保留显示） -->
   <block wx:if="{{!loading || refreshing}}">
-
-    <!-- 顶部导航栏：高度 = 状态栏 + 内容区，右侧留出胶囊按钮空间 -->
-    <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
-      <view class="nav-content" style="height: {{navBarContentHeight}}px; padding-right: {{navContentPaddingRight}}px">
-        <!-- 城市标签栏 -->
-        <view class="city-tabs">
-          <view class="city-tab {{activeCityIndex === index ? 'active' : ''}}" 
-            wx:for="{{savedCities}}" wx:key="index"
-            catchtap="switchCity" data-index="{{index}}"
-            bindlongpress="onCityLongPress" data-city-index="{{index}}">
-            {{item.name}}
-          </view>
-          <view class="city-tab-add" catchtap="goCityChoose">
-            <text class="add-icon">+</text>
-          </view>
-        </view>
-        <!-- 搜索按钮 -->
-        <view class="nav-search-btn" catchtap="showSearchPanel">
-          <text class="nav-search-icon">🔍</text>
-        </view>
-      </view>
-    </view>
 
     <!-- 搜索面板（覆盖层） -->
     <view class="search-panel" wx:if="{{searchPanelShow}}">

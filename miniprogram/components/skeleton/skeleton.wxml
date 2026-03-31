@@ -1,5 +1,5 @@
 <!-- 骨架屏组件 -->
-<view class="skeleton-container">
+<view class="skeleton-container" style="padding-top: {{paddingTop}}px">
   <!-- 头部区域 -->
   <view class="skeleton-header">
     <view class="skeleton skeleton-city"></view>
