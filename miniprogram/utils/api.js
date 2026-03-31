@@ -481,7 +481,45 @@ function _doGetLocation(resolve, reject) {
         }).catch(reject)
       })
     },
-    fail() {
+    fail(err) {
+      // 区分不同错误类型，给出不同的引导
+      if (err && err.errMsg) {
+        if (err.errMsg.indexOf('auth deny') !== -1 || err.errMsg.indexOf('authorize deny') !== -1) {
+          // 用户主动拒绝 → 弹窗引导去设置开启
+          wx.showModal({
+            title: '定位权限未开启',
+            content: '获取定位后才能显示当地天气哦～请在设置中开启定位权限',
+            confirmText: '去设置',
+            cancelText: '取消',
+            success(res) {
+              if (res.confirm) {
+                wx.openSetting({
+                  success(settingRes) {
+                    if (settingRes.authSetting['scope.userLocation']) {
+                      // 用户开启后重新尝试定位
+                      _doGetLocation(resolve, reject)
+                    } else {
+                      _fallbackToDefault(resolve, reject)
+                    }
+                  },
+                  fail() {
+                    _fallbackToDefault(resolve, reject)
+                  },
+                })
+              } else {
+                _fallbackToDefault(resolve, reject)
+              }
+            },
+          })
+          return
+        }
+        if (err.errMsg.indexOf('no network') !== -1 || err.errMsg.indexOf('network') !== -1) {
+          wx.showToast({ title: '网络不可用', icon: 'none' })
+          _fallbackToDefault(resolve, reject)
+          return
+        }
+      }
+      // 其他未知错误，直接降级
       _fallbackToDefault(resolve, reject)
     },
   })

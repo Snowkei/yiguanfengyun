@@ -88,8 +88,10 @@ Page({
   },
 
   onLoad() {
+    const navBarTotal = app.globalData.navBarTotalHeight || (app.globalData.statusBarHeight + 88)
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight || 44,
+      navBarTotalHeight: navBarTotal,
       isIPhoneX: app.globalData.isIPhoneX,
       searchHistory: storage.get('searchHistory', []),
       savedCities: storage.get('savedCities', null) || DEFAULT_CITIES,

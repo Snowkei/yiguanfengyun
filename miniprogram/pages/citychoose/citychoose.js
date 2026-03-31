@@ -19,12 +19,11 @@ Page({
   onLoad() {
     const sysInfo = app.globalData.systemInfo || {}
     const statusBarHeight = sysInfo.statusBarHeight || 44
-    // rpx 转 px 比例：设计稿750rpx = 屏幕宽度px，所以 88rpx = 88 * screenWidth / 750
-    const rpxToPx = (sysInfo.screenWidth || 375) / 750
-    const navBarHeight = statusBarHeight + 88 * rpxToPx
+    const navBarTotalHeight = app.globalData.navBarTotalHeight || (statusBarHeight + 88)
     this.setData({
       statusBarHeight,
-      navBarHeight,
+      navBarHeight: navBarTotalHeight,
+      navBarTotalHeight,
     })
     const cities = this._getSorted(staticData.cities || [])
     this.setData({ cities, showItems: cities })

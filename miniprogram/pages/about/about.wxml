@@ -1,7 +1,7 @@
 <!-- 关于页 -->
 <view class="about-page">
   <!-- 自定义导航栏 -->
-  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px">
+  <view class="nav-bar" style="padding-top: {{statusBarHeight}}px; height: calc({{navBarTotalHeight}}px - {{statusBarHeight}}px)">
     <view class="nav-content">
       <view class="nav-back" catchtap="goBack">
         <text class="nav-back-icon">‹</text>

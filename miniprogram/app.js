@@ -12,6 +12,19 @@ App({
         this.globalData.statusBarHeight = res.statusBarHeight
         this.globalData.screenWidth = res.windowWidth
         this.globalData.screenHeight = res.windowHeight
+        // 计算导航栏高度：菜单按钮下边缘 - 状态栏高度，取较大值确保不遮挡
+        if (wx.getMenuButtonBoundingClientRect) {
+          const menuBtn = wx.getMenuButtonBoundingClientRect()
+          this.globalData.menuButtonInfo = menuBtn
+          // 胶囊按钮上边缘到状态栏底部的距离
+          const menuBtnTop = menuBtn.top // 通常等于 statusBarHeight
+          // 导航栏内容区高度 = 胶囊高度，左右对齐
+          this.globalData.navBarHeight = menuBtn.height + (menuBtn.top - res.statusBarHeight) * 2
+          this.globalData.navBarTotalHeight = menuBtn.bottom + 4 // 加少量间距
+        } else {
+          this.globalData.navBarHeight = 32
+          this.globalData.navBarTotalHeight = res.statusBarHeight + 44
+        }
       },
     })
     this.checkUpdate()
@@ -23,6 +36,9 @@ App({
     systemInfo: {},
     isIPhoneX: false,
     statusBarHeight: 0,
+    navBarHeight: 32, // 导航栏内容高度
+    navBarTotalHeight: 88, // 导航栏总高度（含状态栏）
+    menuButtonInfo: null, // 菜单按钮信息
     screenWidth: 0,
     screenHeight: 0,
     currentWeather: null,

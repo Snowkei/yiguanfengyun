@@ -7,8 +7,10 @@ Page({
   },
 
   onLoad() {
+    const app = getApp()
     this.setData({
-      statusBarHeight: getApp().globalData.statusBarHeight || 44,
+      statusBarHeight: app.globalData.statusBarHeight || 44,
+      navBarTotalHeight: app.globalData.navBarTotalHeight || (app.globalData.statusBarHeight + 88),
     })
   },
 

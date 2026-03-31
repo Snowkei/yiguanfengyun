@@ -118,7 +118,7 @@
   background: rgba(0,0,0,0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 }
 .nav-content {
-  height: 88rpx; display: flex; align-items: center; padding: 0 16rpx;
+  height: 100%; display: flex; align-items: center; padding: 0 16rpx;
   box-sizing: border-box;
 }
 
