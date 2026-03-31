@@ -32,7 +32,7 @@ Page({
     statusBarHeight: 20,
     navBarContentHeight: 44,
     navBarTotalHeight: 64,
-    menuButtonLeft: 0,
+    navContentPaddingRight: 100,
     isIPhoneX: false,
 
     // 多城市
@@ -92,11 +92,12 @@ Page({
 
   onLoad() {
     const g = app.globalData
+    const menuLeft = g.menuButtonLeft || 0
     this.setData({
       statusBarHeight: g.statusBarHeight || 20,
       navBarContentHeight: g.navBarContentHeight || 44,
       navBarTotalHeight: g.navBarTotalHeight || 64,
-      menuButtonLeft: g.menuButtonLeft || 0,
+      navContentPaddingRight: menuLeft > 0 ? (menuLeft - 8) : 100,
       isIPhoneX: g.isIPhoneX,
       searchHistory: storage.get('searchHistory', []),
       savedCities: storage.get('savedCities', null) || DEFAULT_CITIES,

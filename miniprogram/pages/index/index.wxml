@@ -67,7 +67,7 @@
 
     <!-- 顶部导航栏：高度 = 状态栏 + 内容区，右侧留出胶囊按钮空间 -->
     <view class="nav-bar" style="height: {{navBarTotalHeight}}px; padding-top: {{statusBarHeight}}px">
-      <view class="nav-content" style="height: {{navBarContentHeight}}px; padding-right: {{menuButtonLeft > 0 ? (menuButtonLeft - 8) + 'px' : '100px'}}">
+      <view class="nav-content" style="height: {{navBarContentHeight}}px; padding-right: {{navContentPaddingRight}}px">
         <!-- 城市标签栏 -->
         <view class="city-tabs">
           <view class="city-tab {{activeCityIndex === index ? 'active' : ''}}" 

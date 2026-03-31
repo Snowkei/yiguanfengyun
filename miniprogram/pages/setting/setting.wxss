@@ -4,13 +4,13 @@
 }
 
 /* 自定义导航栏 */
-.nav-bar {
+.nav-bar { box-sizing: border-box;
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   background: #fff;
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
 }
 .nav-content {
-  height: 88rpx; display: flex; align-items: center; padding: 0 24rpx;
+  height: 100%; display: flex; align-items: center; padding: 0 24rpx;
   box-sizing: border-box;
 }
 .nav-back {

@@ -14,10 +14,11 @@
   z-index: 100;
   background: #fff;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
 }
 
 .nav-content {
-  height: 88rpx;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

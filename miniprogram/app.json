@@ -1,6 +1,8 @@
 {
   "__usePrivacyCheck__": true,
-  "requiredPrivateInfos": ["getLocation"],
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
   "pages": [
     "pages/index/index",
     "pages/diary/diary",
@@ -22,21 +24,21 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "🏠首页",
+        "text": "首页",
         "iconPath": "images/tab_home.png",
-        "selectedIconPath": "images/tab_home.png"
+        "selectedIconPath": "images/tab_home_sel.png"
       },
       {
         "pagePath": "pages/diary/diary",
-        "text": "📔日记",
+        "text": "日记",
         "iconPath": "images/tab_diary.png",
-        "selectedIconPath": "images/tab_diary.png"
+        "selectedIconPath": "images/tab_diary_sel.png"
       },
       {
         "pagePath": "pages/setting/setting",
-        "text": "⚙️设置",
+        "text": "设置",
         "iconPath": "images/tab_setting.png",
-        "selectedIconPath": "images/tab_setting.png"
+        "selectedIconPath": "images/tab_setting_sel.png"
       }
     ]
   },
